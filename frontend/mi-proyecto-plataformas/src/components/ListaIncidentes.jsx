@@ -118,11 +118,11 @@ function ListaIncidentes({ incidentes, onGuardar, onEliminar, onBuscarPorId }) {
   });
 
   return (
-    <div className="contenedor-incidentes" style={{ padding: '20px' }}>
+    <div className="contenedor-incidentes w-full p-3 sm:p-5">
       
       {/* Barra superior: Botón + Búsqueda + Filtro */}
-      <div style={{ display: 'flex', gap: '12px', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap' }}>
-        <form onSubmit={buscar} style={{ display: 'flex', gap: '6px' }}>
+      <div className="mb-5 flex flex-col items-stretch gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+        <form onSubmit={buscar} className="flex w-full gap-1.5 sm:w-auto">
           <input 
             type="search" 
             placeholder="Buscar por título, tipo o ID..." 
@@ -131,7 +131,8 @@ function ListaIncidentes({ incidentes, onGuardar, onEliminar, onBuscarPorId }) {
               setBusqueda(e.target.value);
               if (!e.target.value.trim()) limpiarBusqueda();
             }}
-            style={{ ...inputStyle, minWidth: '220px', marginTop: 0 }}
+            className="w-full sm:min-w-[220px]"
+            style={{ ...inputStyle, marginTop: 0 }}
           />
           <button type="submit" disabled={buscandoPorId} style={searchButtonStyle}>
             {buscandoPorId ? 'Buscando...' : 'Buscar'}
@@ -143,6 +144,7 @@ function ListaIncidentes({ incidentes, onGuardar, onEliminar, onBuscarPorId }) {
         <select 
           value={filtroPrioridad}
           onChange={(e) => setFiltroPrioridad(e.target.value)}
+          className="w-full sm:w-auto"
           style={{ ...inputStyle, cursor: 'pointer', marginTop: 0 }}
         >
           <option value="">Todas las prioridades</option>
@@ -152,7 +154,7 @@ function ListaIncidentes({ incidentes, onGuardar, onEliminar, onBuscarPorId }) {
         </select>
 
         <button 
-          className="btn-crear" 
+          className="btn-crear w-full sm:ml-auto sm:w-auto"
           onClick={() => abrirFormulario()}
           style={{ 
             padding: '10px 18px', 
@@ -171,8 +173,8 @@ function ListaIncidentes({ incidentes, onGuardar, onEliminar, onBuscarPorId }) {
 
       {/* Modal / Formulario de Creación */}
       {mostrarFormulario && (
-        <div style={modalOverlayStyle}>
-          <div style={modalContentStyle}>
+        <div className="p-3" style={modalOverlayStyle}>
+          <div className="max-h-[90vh] overflow-y-auto" style={modalContentStyle}>
             <h2 style={{ marginTop: 0, color: '#111827' }}>{incidenteEnEdicion ? 'Editar Incidente' : 'Crear Nuevo Incidente'}</h2>
             <form onSubmit={handleSubmit}>
               <div style={formGroupStyle}>
@@ -187,7 +189,7 @@ function ListaIncidentes({ incidentes, onGuardar, onEliminar, onBuscarPorId }) {
                 />
               </div>
 
-              <div style={{ display: 'flex', gap: '10px' }}>
+              <div className="flex flex-col gap-2 sm:flex-row">
                 <div style={{ ...formGroupStyle, flex: 1 }}>
                   <label>Tipo:</label>
                   <input 
@@ -213,7 +215,7 @@ function ListaIncidentes({ incidentes, onGuardar, onEliminar, onBuscarPorId }) {
                 </div>
               </div>
 
-              <div style={{ display: 'flex', gap: '10px' }}>
+              <div className="flex flex-col gap-2 sm:flex-row">
                 <div style={{ ...formGroupStyle, flex: 1 }}>
                   <label>Prioridad:</label>
                   <select name="prioridad" value={formData.prioridad} onChange={handleChange} style={inputStyle}>
@@ -232,7 +234,7 @@ function ListaIncidentes({ incidentes, onGuardar, onEliminar, onBuscarPorId }) {
                 </div>
               </div>
 
-              <div style={{ display: 'flex', gap: '10px' }}>
+              <div className="flex flex-col gap-2 sm:flex-row">
                 <div style={{ ...formGroupStyle, flex: 1 }}>
                   <label>Fecha de Creación:</label>
                   <input 
@@ -267,7 +269,7 @@ function ListaIncidentes({ incidentes, onGuardar, onEliminar, onBuscarPorId }) {
                 />
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '15px' }}>
+              <div className="flex flex-col justify-end gap-2 pt-3 sm:flex-row" style={{ marginTop: '15px' }}>
                 <button 
                   type="button" 
                   onClick={cerrarFormulario}
@@ -293,7 +295,7 @@ function ListaIncidentes({ incidentes, onGuardar, onEliminar, onBuscarPorId }) {
         <p>No se encontraron incidentes.</p>
       ) : (
         <div style={{ overflowX: 'auto' }}>
-          <table className="tabla-incidentes" style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontFamily: 'sans-serif' }}>
+          <table className="tabla-incidentes min-w-[900px]" style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontFamily: 'sans-serif' }}>
             <thead>
               <tr style={{ backgroundColor: '#2d3748', color: '#ffffff' }}>
                 <th style={cellStyle}>ID</th>
@@ -353,7 +355,7 @@ function ListaIncidentes({ incidentes, onGuardar, onEliminar, onBuscarPorId }) {
 
       {incidenteAEliminar && (
         <div style={modalOverlayStyle} role="presentation">
-          <div style={deleteModalStyle} role="dialog" aria-modal="true" aria-labelledby="titulo-confirmacion">
+          <div className="max-h-[90vh] overflow-y-auto" style={deleteModalStyle} role="dialog" aria-modal="true" aria-labelledby="titulo-confirmacion">
             <h2 id="titulo-confirmacion" style={{ marginTop: 0, color: '#111827' }}>¿Está seguro de eliminar este registro?</h2>
             <p style={{ marginBottom: '24px' }}>
               Esta acción eliminará el incidente seleccionado.
@@ -363,7 +365,7 @@ function ListaIncidentes({ incidentes, onGuardar, onEliminar, onBuscarPorId }) {
               <p><strong>Título:</strong> {incidenteAEliminar.tituloIncidente || 'Sin título'}</p>
               <p><strong>Prioridad:</strong> {incidenteAEliminar.prioridad || 'Sin prioridad'}</p>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+            <div className="flex flex-col justify-end gap-2 sm:flex-row">
               <button
                 type="button"
                 onClick={() => setIncidenteAEliminar(null)}
