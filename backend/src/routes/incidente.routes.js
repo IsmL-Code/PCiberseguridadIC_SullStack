@@ -1,0 +1,12 @@
+const router = require("express").Router();
+const controller = require("../controllers/incidentes.controller");
+const { validar } = require("../middlewares/validate.middleware");
+const { verificarToken } = require("../middlewares/auth.middleware");
+const { incidenteSchema } = require("../schemas/incidente.schema");
+router.use(verificarToken);
+router.get("/", controller.listar);
+router.get("/:id", controller.obtener);
+router.post("/", validar(incidenteSchema), controller.crear);
+router.put("/:id", validar(incidenteSchema), controller.actualizar);
+router.delete("/:id", controller.eliminar);
+module.exports = router;

@@ -1,11 +1,12 @@
 import { useState } from 'react';
 
-function ListaIncidentes({ incidentes, onGuardar, onEliminar, onBuscarPorId }) {
+function ListaIncidentes({ incidentes, onGuardar, onEliminar, onBuscarPorId, filtros, onFiltrosChange }) {
   const [busqueda, setBusqueda] = useState('');
   const [resultadoPorId, setResultadoPorId] = useState(null);
   const [buscandoPorId, setBuscandoPorId] = useState(false);
   const [errorBusqueda, setErrorBusqueda] = useState('');
-  const [filtroPrioridad, setFiltroPrioridad] = useState('');
+  const [filtroPrioridad, setFiltroPrioridad] = useState(filtros?.prioridad || '');
+  const [filtroEstado, setFiltroEstado] = useState(filtros?.estado || '');
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
   const [incidenteEnEdicion, setIncidenteEnEdicion] = useState(null);
   const [incidenteAEliminar, setIncidenteAEliminar] = useState(null);
@@ -17,10 +18,9 @@ function ListaIncidentes({ incidentes, onGuardar, onEliminar, onBuscarPorId }) {
     tituloIncidente: '',
     tipo: '',
     sistemaAfectado: '',
-    prioridad: 'Media',
-    estado: 'Registrado',
+    prioridad: 'MEDIA',
+    estado: 'ABIERTO',
     descripcion: '',
-    fechaCreacion: '',
     evidencia: ''
   });
 
@@ -36,10 +36,9 @@ function ListaIncidentes({ incidentes, onGuardar, onEliminar, onBuscarPorId }) {
       tituloIncidente: '',
       tipo: '',
       sistemaAfectado: '',
-      prioridad: 'Media',
-      estado: 'Registrado',
+      prioridad: 'MEDIA',
+      estado: 'ABIERTO',
       descripcion: '',
-      fechaCreacion: '',
       evidencia: ''
     });
     setMostrarFormulario(true);
@@ -143,14 +142,34 @@ function ListaIncidentes({ incidentes, onGuardar, onEliminar, onBuscarPorId }) {
 
         <select 
           value={filtroPrioridad}
-          onChange={(e) => setFiltroPrioridad(e.target.value)}
+          onChange={(e) => {
+            const prioridad = e.target.value;
+            setFiltroPrioridad(prioridad);
+            onFiltrosChange?.({ estado: filtroEstado, prioridad });
+          }}
           className="w-full sm:w-auto"
           style={{ ...inputStyle, cursor: 'pointer', marginTop: 0 }}
         >
           <option value="">Todas las prioridades</option>
-          <option value="Alta">Alta</option>
-          <option value="Media">Media</option>
-          <option value="Baja">Baja</option>
+          <option value="ALTA">Alta</option>
+          <option value="MEDIA">Media</option>
+          <option value="BAJA">Baja</option>
+        </select>
+
+        <select
+          value={filtroEstado}
+          onChange={(e) => {
+            const estado = e.target.value;
+            setFiltroEstado(estado);
+            onFiltrosChange?.({ estado, prioridad: filtroPrioridad });
+          }}
+          className="w-full sm:w-auto"
+          style={{ ...inputStyle, cursor: 'pointer', marginTop: 0 }}
+        >
+          <option value="">Todos los estados</option>
+          <option value="ABIERTO">Abierto</option>
+          <option value="EN_PROCESO">En proceso</option>
+          <option value="CERRADO">Cerrado</option>
         </select>
 
         <button 
@@ -185,6 +204,7 @@ function ListaIncidentes({ incidentes, onGuardar, onEliminar, onBuscarPorId }) {
                   value={formData.tituloIncidente} 
                   onChange={handleChange} 
                   required 
+                  minLength={5}
                   style={inputStyle}
                 />
               </div>
@@ -198,6 +218,7 @@ function ListaIncidentes({ incidentes, onGuardar, onEliminar, onBuscarPorId }) {
                     value={formData.tipo} 
                     onChange={handleChange} 
                     required 
+                    minLength={2}
                     placeholder="Ej. Phishing" 
                     style={inputStyle}
                   />
@@ -219,43 +240,32 @@ function ListaIncidentes({ incidentes, onGuardar, onEliminar, onBuscarPorId }) {
                 <div style={{ ...formGroupStyle, flex: 1 }}>
                   <label>Prioridad:</label>
                   <select name="prioridad" value={formData.prioridad} onChange={handleChange} style={inputStyle}>
-                    <option value="Alta">Alta</option>
-                    <option value="Media">Media</option>
-                    <option value="Baja">Baja</option>
+                    <option value="BAJA">Baja</option>
+                    <option value="MEDIA">Media</option>
+                    <option value="ALTA">Alta</option>
+                    <option value="CRITICA">Crítica</option>
                   </select>
                 </div>
                 <div style={{ ...formGroupStyle, flex: 1 }}>
                   <label>Estado:</label>
                   <select name="estado" value={formData.estado} onChange={handleChange} style={inputStyle}>
-                    <option value="Registrado">Registrado</option>
-                    <option value="En revisión">En revisión</option>
-                    <option value="Solucionado">Solucionado</option>
+                    <option value="ABIERTO">Abierto</option>
+                    <option value="EN_PROCESO">En proceso</option>
+                    <option value="CERRADO">Cerrado</option>
                   </select>
                 </div>
               </div>
 
-              <div className="flex flex-col gap-2 sm:flex-row">
-                <div style={{ ...formGroupStyle, flex: 1 }}>
-                  <label>Fecha de Creación:</label>
-                  <input 
-                    type="date" 
-                    name="fechaCreacion" 
-                    value={formData.fechaCreacion} 
-                    onChange={handleChange} 
-                    style={inputStyle}
-                  />
-                </div>
-                <div style={{ ...formGroupStyle, flex: 1 }}>
-                  <label>Evidencia:</label>
-                  <input 
-                    type="text" 
-                    name="evidencia" 
-                    value={formData.evidencia} 
-                    onChange={handleChange} 
-                    placeholder="Ej. captura.png" 
-                    style={inputStyle}
-                  />
-                </div>
+              <div style={formGroupStyle}>
+                <label>Evidencia:</label>
+                <input 
+                  type="text" 
+                  name="evidencia" 
+                  value={formData.evidencia} 
+                  onChange={handleChange} 
+                  placeholder="Ej. captura.png" 
+                  style={inputStyle}
+                />
               </div>
 
               <div style={formGroupStyle}>
@@ -265,6 +275,8 @@ function ListaIncidentes({ incidentes, onGuardar, onEliminar, onBuscarPorId }) {
                   value={formData.descripcion} 
                   onChange={handleChange} 
                   rows="3" 
+                  required
+                  minLength={10}
                   style={{ ...inputStyle, resize: 'vertical' }}
                 />
               </div>

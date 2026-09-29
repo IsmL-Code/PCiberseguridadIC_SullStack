@@ -16,12 +16,18 @@ function Dashboard() {
   const [incidentes, setIncidentes] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState(null);
+  const [mensajeExito, setMensajeExito] = useState('');
+  const [filtros, setFiltros] = useState({ estado: '', prioridad: '' });
   const navigate = useNavigate();
+  const usuario = JSON.parse(localStorage.getItem("usuario") || "null");
+  const nombreUsuario = usuario
+    ? `${usuario.nombre} ${usuario.apellido}`.trim()
+    : "Usuario";
 
-  const cargarIncidentes = async () => {
+  const cargarIncidentes = async (filtrosActuales = filtros) => {
     setError(null);
     try {
-      const datos = await obtenerIncidentes();
+      const datos = await obtenerIncidentes(filtrosActuales);
       setIncidentes(datos);
     } catch (err) {
       setError(err.message);
@@ -31,7 +37,7 @@ function Dashboard() {
   useEffect(() => {
     let componenteActivo = true;
 
-    obtenerIncidentes()
+    obtenerIncidentes(filtros)
       .then((datos) => {
         if (componenteActivo) setIncidentes(datos);
       })
@@ -45,17 +51,20 @@ function Dashboard() {
     return () => {
       componenteActivo = false;
     };
-  }, []); 
+  }, [filtros]);
 
   const guardarIncidente = async (datos, id) => {
     setError(null);
+    setMensajeExito('');
     try {
       if (id) {
         await actualizarIncidente(id, datos);
+        setMensajeExito('Incidente modificado satisfactoriamente.');
       } else {
         await crearIncidente(datos);
+        setMensajeExito('Incidente guardado satisfactoriamente.');
       }
-      await cargarIncidentes();
+      await cargarIncidentes(filtros);
     } catch (err) {
       setError(err.message);
       throw err;
@@ -64,6 +73,7 @@ function Dashboard() {
 
   const borrarIncidente = async (id) => {
     setError(null);
+    setMensajeExito('');
     try {
       await eliminarIncidente(id);
       setIncidentes((actuales) => actuales.filter((incidente) => incidente.id !== id));
@@ -81,15 +91,17 @@ function Dashboard() {
   }).length;
   const incidentesEnProceso = incidentes.filter((incidente) => {
     const estado = (incidente.estado || '').toLowerCase();
-    return estado === 'en curso' || estado === 'en revisión' || estado === 'en revision' || estado === 'en proceso';
+    return estado === 'en_proceso' || estado === 'en curso' || estado === 'en revisión' || estado === 'en revision' || estado === 'en proceso';
   }).length;
   const incidentesResueltos = incidentes.filter((incidente) => {
     const estado = (incidente.estado || '').toLowerCase();
-    return estado === 'resuelto' || estado === 'solucionado';
+    return estado === 'cerrado' || estado === 'resuelto' || estado === 'solucionado';
   }).length;
 
   const handleLogout = () => {
     localStorage.removeItem("isAuthenticated");
+    localStorage.removeItem("authToken");
+    localStorage.removeItem("usuario");
     navigate("/login");
   };
  
@@ -105,7 +117,7 @@ function Dashboard() {
             </div>
           </div>
           <div className="flex w-full flex-wrap items-center justify-end gap-3 sm:w-auto">
-            <span className="text-[13px] font-semibold text-slate-200">Ismael Cepeda</span>
+            <span className="text-[13px] font-semibold text-slate-200">{nombreUsuario}</span>
             <button
               onClick={handleLogout}
               className="shrink-0 cursor-pointer rounded-md border-0 bg-red-500 px-4 py-2 font-bold text-white transition-colors hover:bg-red-600"
@@ -143,12 +155,15 @@ function Dashboard() {
         <div className="mx-auto w-full max-w-5xl">
           {cargando && <p className="p-5">Cargando incidentes...</p>}
           {error && <p className="error p-5">Error: {error}</p>}
+          {mensajeExito && <p className="p-5 text-emerald-400">{mensajeExito}</p>}
           {!cargando && (
             <ListaIncidentes
               incidentes={incidentes}
               onGuardar={guardarIncidente}
               onEliminar={borrarIncidente}
               onBuscarPorId={buscarIncidentePorId}
+              filtros={filtros}
+              onFiltrosChange={setFiltros}
             />
           )}
         </div>

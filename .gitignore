@@ -1,1 +1,26 @@
+# Editor and local environment
 .vscode/
+.env
+.env.*
+!.env.example
+
+# Dependencies
+node_modules/
+
+# Frontend build output
+dist/
+frontend/*/dist/
+
+# Runtime output and logs
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Temporary and operating-system files
+*.tmp
+*.temp
+.DS_Store
+Thumbs.db

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { iniciarSesion } from '../services/authApi';
 
 export default function App() {
   const navigate = useNavigate();
@@ -14,20 +15,22 @@ export default function App() {
   const [recoveryEmail, setRecoveryEmail] = useState('');
   const [recoverySent, setRecoverySent] = useState(false);
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     setErrorMessage('');
     setIsLoading(true);
 
-    setTimeout(() => {
+    try {
+      const respuesta = await iniciarSesion(email, password);
+      localStorage.setItem('isAuthenticated', 'true');
+      localStorage.setItem('authToken', respuesta.token);
+      localStorage.setItem('usuario', JSON.stringify(respuesta.usuario));
+      navigate('/dashboard');
+    } catch (error) {
+      setErrorMessage(error.message);
+    } finally {
       setIsLoading(false);
-      if (email.trim() && password.length >= 4) {
-        localStorage.setItem('isAuthenticated', 'true');
-        navigate('/dashboard');
-      } else {
-        setErrorMessage('Credenciales inválidas. Por favor verifique su correo y contraseña.');
-      }
-    }, 1200);
+    }
   };
 
   const fillDemo = () => {

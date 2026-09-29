@@ -1,4 +1,9 @@
-const API_URL = "http://localhost:3000/incidentes"; //[cite: 5]
+const API_URL = `${import.meta.env.VITE_API_URL || "http://localhost:3000"}/api/incidentes`;
+
+function encabezadosAutenticacion() {
+  const token = localStorage.getItem("authToken");
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
 
 async function procesarRespuesta(respuesta, mensajeError) {
   if (!respuesta.ok) {
@@ -6,6 +11,9 @@ async function procesarRespuesta(respuesta, mensajeError) {
     try {
       const cuerpo = await respuesta.json();
       detalle = cuerpo.error ? `: ${cuerpo.error}` : "";
+      if (cuerpo.detalles?.length) {
+        detalle += ` (${cuerpo.detalles.map((item) => `${item.campo}: ${item.mensaje}`).join(", ")})`;
+      }
     } catch {
       // La respuesta puede no tener un cuerpo JSON.
     }
@@ -15,13 +23,17 @@ async function procesarRespuesta(respuesta, mensajeError) {
   return respuesta.status === 204 ? null : respuesta.json();
 }
 
-export async function obtenerIncidentes() { //[cite: 5]
-  const respuesta = await fetch(API_URL); //[cite: 5]
+export async function obtenerIncidentes(filtros = {}) { //[cite: 5]
+  const parametros = new URLSearchParams();
+  if (filtros.estado) parametros.set("estado", filtros.estado);
+  if (filtros.prioridad) parametros.set("prioridad", filtros.prioridad);
+  const query = parametros.toString();
+  const respuesta = await fetch(`${API_URL}${query ? `?${query}` : ""}`, { headers: encabezadosAutenticacion() }); //[cite: 5]
   return procesarRespuesta(respuesta, "No se pudo obtener la lista de incidentes");
 }
 
 export async function obtenerIncidentePorId(id) {
-  const respuesta = await fetch(`${API_URL}/${id}`);
+  const respuesta = await fetch(`${API_URL}/${id}`, { headers: encabezadosAutenticacion() });
   return procesarRespuesta(respuesta, "No se pudo obtener el incidente");
 }
 
@@ -29,9 +41,7 @@ export async function obtenerIncidentePorId(id) {
 export async function crearIncidente(datosNuevoIncidente) {
   const respuesta = await fetch(API_URL, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
+    headers: { "Content-Type": "application/json", ...encabezadosAutenticacion() },
     body: JSON.stringify(datosNuevoIncidente)
   });
 
@@ -41,9 +51,7 @@ export async function crearIncidente(datosNuevoIncidente) {
 export async function actualizarIncidente(id, datosIncidente) {
   const respuesta = await fetch(`${API_URL}/${id}`, {
     method: "PUT",
-    headers: {
-      "Content-Type": "application/json"
-    },
+    headers: { "Content-Type": "application/json", ...encabezadosAutenticacion() },
     body: JSON.stringify(datosIncidente)
   });
 
@@ -52,7 +60,8 @@ export async function actualizarIncidente(id, datosIncidente) {
 
 export async function eliminarIncidente(id) {
   const respuesta = await fetch(`${API_URL}/${id}`, {
-    method: "DELETE"
+    method: "DELETE",
+    headers: encabezadosAutenticacion()
   });
 
   return procesarRespuesta(respuesta, "Error al eliminar el incidente");

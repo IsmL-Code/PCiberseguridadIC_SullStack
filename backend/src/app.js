@@ -1,0 +1,15 @@
+const express = require("express");
+const cors = require("cors");
+const rutas = require("./routes/incidente.routes");
+const rutasUsuarios = require("./routes/usuario.routes");
+const rutasAuth = require("./routes/auth.routes");
+const { noEncontrado, manejarError } = require("./middlewares/error.middleware");
+const app = express();
+app.use(cors());
+app.use(express.json());
+app.use("/api/incidentes", rutas);
+app.use("/api/usuarios", rutasUsuarios);
+app.use("/api/auth", rutasAuth);
+app.use(noEncontrado);
+app.use(manejarError);
+module.exports = app;

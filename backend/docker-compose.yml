@@ -1,0 +1,17 @@
+services:
+  mysql:
+    image: mysql:8.4
+    environment:
+      MYSQL_ROOT_PASSWORD: root_segura
+      MYSQL_DATABASE: incidentes_ic
+      MYSQL_USER: app_user
+      MYSQL_PASSWORD: app_segura
+    ports:
+      - "3306:3306"
+    volumes:
+      - type: volume
+        source: mysql_data
+        target: /var/lib/mysql
+
+volumes:
+  mysql_data:
