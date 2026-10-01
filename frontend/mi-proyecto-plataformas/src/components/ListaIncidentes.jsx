@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 function ListaIncidentes({ incidentes, onGuardar, onEliminar, onBuscarPorId, filtros, onFiltrosChange }) {
   const [busqueda, setBusqueda] = useState('');
@@ -12,6 +12,14 @@ function ListaIncidentes({ incidentes, onGuardar, onEliminar, onBuscarPorId, fil
   const [incidenteAEliminar, setIncidenteAEliminar] = useState(null);
   const [eliminando, setEliminando] = useState(false);
   const [guardando, setGuardando] = useState(false);
+  const [toastValidacion, setToastValidacion] = useState(null);
+
+  useEffect(() => {
+    if (!toastValidacion) return;
+
+    const temporizador = setTimeout(() => setToastValidacion(null), 5000);
+    return () => clearTimeout(temporizador);
+  }, [toastValidacion]);
 
   // Estado para controlar los campos del formulario
   const [formData, setFormData] = useState({
@@ -27,6 +35,7 @@ function ListaIncidentes({ incidentes, onGuardar, onEliminar, onBuscarPorId, fil
   // Manejar el cambio en los inputs del formulario
   const handleChange = (e) => {
     const { name, value } = e.target;
+    setToastValidacion(null);
     setFormData({ ...formData, [name]: value });
   };
 
@@ -47,10 +56,33 @@ function ListaIncidentes({ incidentes, onGuardar, onEliminar, onBuscarPorId, fil
   const cerrarFormulario = () => {
     setMostrarFormulario(false);
     setIncidenteEnEdicion(null);
+    setToastValidacion(null);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    const camposObligatorios = [
+      { nombre: 'El título', valor: formData.tituloIncidente, minimo: 5 },
+      { nombre: 'El tipo', valor: formData.tipo, minimo: 2 },
+      { nombre: 'La descripción', valor: formData.descripcion, minimo: 10 }
+    ];
+
+    for (const campo of camposObligatorios) {
+      const valor = String(campo.valor || '').trim();
+      if (!valor) {
+        setToastValidacion({ mensaje: `${campo.nombre} es obligatorio.` });
+        return;
+      }
+      if (valor.length < campo.minimo) {
+        setToastValidacion({
+          mensaje: `${campo.nombre} debe tener al menos ${campo.minimo} caracteres (actualmente tiene ${valor.length}).`
+        });
+        return;
+      }
+    }
+
+    setToastValidacion(null);
     if (!onGuardar) return;
 
     setGuardando(true);
@@ -118,6 +150,23 @@ function ListaIncidentes({ incidentes, onGuardar, onEliminar, onBuscarPorId, fil
 
   return (
     <div className="contenedor-incidentes w-full p-3 sm:p-5">
+      {toastValidacion && (
+        <div
+          role="alert"
+          aria-live="assertive"
+          className="fixed right-4 top-4 z-[1100] flex max-w-[calc(100vw-2rem)] items-start gap-3 rounded-md border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800 shadow-lg"
+        >
+          <span className="flex-1">{toastValidacion.mensaje}</span>
+          <button
+            type="button"
+            aria-label="Cerrar aviso"
+            onClick={() => setToastValidacion(null)}
+            className="shrink-0 border-0 bg-transparent font-bold text-red-800"
+          >
+            ×
+          </button>
+        </div>
+      )}
       
       {/* Barra superior: Botón + Búsqueda + Filtro */}
       <div className="mb-5 flex flex-col items-stretch gap-3 sm:flex-row sm:flex-wrap sm:items-center">
@@ -195,7 +244,7 @@ function ListaIncidentes({ incidentes, onGuardar, onEliminar, onBuscarPorId, fil
         <div className="p-3" style={modalOverlayStyle}>
           <div className="max-h-[90vh] overflow-y-auto" style={modalContentStyle}>
             <h2 style={{ marginTop: 0, color: '#111827' }}>{incidenteEnEdicion ? 'Editar Incidente' : 'Crear Nuevo Incidente'}</h2>
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit} noValidate>
               <div style={formGroupStyle}>
                 <label>Título del Incidente:</label>
                 <input 

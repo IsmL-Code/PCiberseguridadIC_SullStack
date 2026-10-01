@@ -1,5 +1,16 @@
+const { PrismaMariaDb } = require("@prisma/adapter-mariadb");
 const { PrismaClient } = require("@prisma/client");
 
-const prisma = new PrismaClient();
+const databaseUrl = new URL(process.env.DATABASE_URL);
+const adapter = new PrismaMariaDb({
+  host: databaseUrl.hostname,
+  port: Number(databaseUrl.port || 3306),
+  user: decodeURIComponent(databaseUrl.username),
+  password: decodeURIComponent(databaseUrl.password),
+  database: databaseUrl.pathname.slice(1),
+  allowPublicKeyRetrieval: true,
+});
+
+const prisma = new PrismaClient({ adapter });
 
 module.exports = prisma;

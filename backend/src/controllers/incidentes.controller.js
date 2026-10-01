@@ -1,4 +1,4 @@
-const prisma = require("../config/prisma");
+const incidenteService = require("../services/incidente.service");
 
 function obtenerIdValido(id) {
   const idNumerico = Number(id);
@@ -42,13 +42,10 @@ async function listar(req, res, next) {
   }
 
   try {
-    const incidentes = await prisma.incidente.findMany({
-      where: {
-        usuarioId: Number(req.usuario.sub),
-        estado: estado || undefined,
-        prioridad: prioridad || undefined
-      },
-      orderBy: { createdAt: "desc" }
+    const incidentes = await incidenteService.listar({
+      usuarioId: Number(req.usuario.sub),
+      estado,
+      prioridad
     });
     res.json(incidentes.map(seleccionarIncidente));
   } catch (error) {
@@ -63,9 +60,10 @@ async function obtener(req, res, next) {
   }
 
   try {
-    const incidente = await prisma.incidente.findFirst({
-      where: { id, usuarioId: Number(req.usuario.sub) }
-    });
+    const incidente = await incidenteService.buscarPorId(
+      id,
+      Number(req.usuario.sub)
+    );
     if (!incidente) {
       return res.status(404).json({ error: "Incidente no encontrado" });
     }
@@ -77,11 +75,9 @@ async function obtener(req, res, next) {
 
 async function crear(req, res, next) {
   try {
-    const incidente = await prisma.incidente.create({
-      data: {
-        ...datosIncidente(req.body),
-        usuarioId: Number(req.usuario.sub)
-      }
+    const incidente = await incidenteService.crear({
+      ...datosIncidente(req.body),
+      usuarioId: Number(req.usuario.sub)
     });
     res.status(201).json(seleccionarIncidente(incidente));
   } catch (error) {
@@ -96,13 +92,11 @@ async function actualizar(req, res, next) {
   }
 
   try {
-    const incidente = await prisma.incidente.update({
-      where: {
-        id,
-        usuarioId: Number(req.usuario.sub)
-      },
-      data: datosIncidente(req.body)
-    });
+    const incidente = await incidenteService.actualizar(
+      id,
+      Number(req.usuario.sub),
+      datosIncidente(req.body)
+    );
     res.json(seleccionarIncidente(incidente));
   } catch (error) {
     next(error);
@@ -116,12 +110,7 @@ async function eliminar(req, res, next) {
   }
 
   try {
-    await prisma.incidente.delete({
-      where: {
-        id,
-        usuarioId: Number(req.usuario.sub)
-      }
-    });
+    await incidenteService.eliminar(id, Number(req.usuario.sub));
     res.status(204).send();
   } catch (error) {
     next(error);

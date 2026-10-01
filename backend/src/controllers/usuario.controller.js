@@ -1,36 +1,13 @@
-const prisma = require("../config/prisma");
-const bcrypt = require("bcryptjs");
+const usuarioService = require("../services/usuario.service");
 
 function obtenerIdValido(id) {
   const idNumerico = Number(id);
   return Number.isInteger(idNumerico) && idNumerico > 0 ? idNumerico : null;
 }
 
-async function datosUsuario(body) {
-  const { nombre, apellido, email, password, rol } = body;
-  return {
-    nombre,
-    apellido,
-    email,
-    password: await bcrypt.hash(password, 12),
-    rol
-  };
-}
-
 async function listar(req, res, next) {
   try {
-    const usuarios = await prisma.usuario.findMany({
-      select: {
-        id: true,
-        nombre: true,
-        apellido: true,
-        email: true,
-        rol: true,
-        createdAt: true,
-        updatedAt: true
-      },
-      orderBy: { createdAt: "desc" }
-    });
+    const usuarios = await usuarioService.listar();
     res.json(usuarios);
   } catch (error) {
     next(error);
@@ -44,18 +21,7 @@ async function obtener(req, res, next) {
   }
 
   try {
-    const usuario = await prisma.usuario.findUnique({
-      where: { id },
-      select: {
-        id: true,
-        nombre: true,
-        apellido: true,
-        email: true,
-        rol: true,
-        createdAt: true,
-        updatedAt: true
-      }
-    });
+    const usuario = await usuarioService.buscarPorId(id);
 
     if (!usuario) {
       return res.status(404).json({ error: "Usuario no encontrado" });
@@ -79,18 +45,7 @@ async function crear(req, res, next) {
   }
 
   try {
-    const usuario = await prisma.usuario.create({
-      data: await datosUsuario(req.body),
-      select: {
-        id: true,
-        nombre: true,
-        apellido: true,
-        email: true,
-        rol: true,
-        createdAt: true,
-        updatedAt: true
-      }
-    });
+    const usuario = await usuarioService.crear(req.body);
     res.status(201).json(usuario);
   } catch (error) {
     next(error);
@@ -107,19 +62,7 @@ async function actualizar(req, res, next) {
   }
 
   try {
-    const usuario = await prisma.usuario.update({
-      where: { id },
-      data: await datosUsuario(req.body),
-      select: {
-        id: true,
-        nombre: true,
-        apellido: true,
-        email: true,
-        rol: true,
-        createdAt: true,
-        updatedAt: true
-      }
-    });
+    const usuario = await usuarioService.actualizar(id, req.body);
     res.json(usuario);
   } catch (error) {
     next(error);
@@ -133,7 +76,7 @@ async function eliminar(req, res, next) {
   }
 
   try {
-    await prisma.usuario.delete({ where: { id } });
+    await usuarioService.eliminar(id);
     res.status(204).send();
   } catch (error) {
     next(error);
