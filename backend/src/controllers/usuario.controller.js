@@ -69,6 +69,20 @@ async function actualizar(req, res, next) {
   }
 }
 
+async function actualizarEstado(req, res, next) {
+  const id = obtenerIdValido(req.params.id);
+  if (!id) {
+    return res.status(400).json({ error: "El id debe ser un entero positivo" });
+  }
+
+  try {
+    const usuario = await usuarioService.actualizarEstado(id, req.body.status);
+    res.json(usuario);
+  } catch (error) {
+    next(error);
+  }
+}
+
 async function eliminar(req, res, next) {
   const id = obtenerIdValido(req.params.id);
   if (!id) {
@@ -83,4 +97,4 @@ async function eliminar(req, res, next) {
   }
 }
 
-module.exports = { listar, obtener, crear, actualizar, eliminar };
+module.exports = { listar, obtener, crear, actualizar, actualizarEstado, eliminar };

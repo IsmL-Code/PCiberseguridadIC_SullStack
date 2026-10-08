@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { iniciarSesion } from '../services/authApi';
+import protegerImage from '../../img/proteger.png';
 
 export default function App() {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [rememberDevice, setRememberDevice] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -33,12 +33,6 @@ export default function App() {
     }
   };
 
-  const fillDemo = () => {
-    setEmail('admin.analyst@pciberseguridad.ic');
-    setPassword('CyberGuard#2026');
-    setErrorMessage('');
-  };
-
   const handleRecoverySubmit = (e) => {
     e.preventDefault();
     if (recoveryEmail.trim()) {
@@ -52,39 +46,29 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between selection:bg-emerald-500 selection:text-slate-950 font-sans antialiased relative overflow-hidden">
+    <div className="login-page min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between selection:bg-emerald-500 selection:text-slate-950 font-sans antialiased relative overflow-x-hidden">
       
       {/* Background Cyber Glowing Orbs */}
       <div className="absolute top-0 left-1/4 w-96 h-96 bg-emerald-600/10 rounded-full blur-3xl pointer-events-none"></div>
       <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl pointer-events-none"></div>
 
       {/* Top Header */}
-      <header className="login-brand-header w-full p-3 sm:p-4 z-10 border-b border-slate-900/80 bg-slate-950/60 backdrop-blur-md">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center space-x-2.5">
-            <div className="w-7 h-7 rounded-md bg-gradient-to-tr from-emerald-600 to-teal-400 flex items-center justify-center shadow-lg shadow-emerald-500/20 text-slate-950">
-              <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
-                <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/>
-              </svg>
-            </div>
-            <div>
-              <h1 className="login-brand-title flex items-center font-bold tracking-tight text-white">
-                PCiberseguridad<span className="text-emerald-500 ml-0.5">IC</span>
-              </h1>
-              <p className="login-brand-subtitle hidden text-slate-400 sm:block">
-                Plataforma centralizada para registro y seguimiento de amenazas
-              </p>
-            </div>
-          </div>
+      <header className="dashboard-topbar login-dashboard-header">
+        <div className="dashboard-brand login-dashboard-brand">
+          <img className="app-header__icon" src={protegerImage} alt="" aria-hidden="true" />
+          <span>
+            <strong>PCiberseguridadIC</strong>
+            <small>Plataforma centralizada para registro y seguimiento de amenazas</small>
+          </span>
         </div>
       </header>
 
       {/* Main Content Area */}
-      <main className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8 py-10 z-10">
+      <main className="login-main flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8 py-10 z-10">
         
         {isLoggedIn ? (
           /* Success Screen Dashboard Redirect */
-          <div className="w-full max-w-md bg-slate-900/90 border border-emerald-500/40 p-8 rounded-2xl shadow-2xl text-center space-y-6 backdrop-blur-xl animate-fadeIn">
+          <div className="login-card w-full max-w-md bg-slate-900/90 border border-emerald-500/40 p-8 rounded-2xl shadow-2xl text-center space-y-6 backdrop-blur-xl animate-fadeIn">
             <div className="w-16 h-16 bg-emerald-500/10 text-emerald-400 rounded-full flex items-center justify-center mx-auto text-2xl border border-emerald-500/20 shadow-lg shadow-emerald-500/10">
               <svg className="w-8 h-8 fill-none stroke-current stroke-2" viewBox="0 0 24 24">
                 <polyline points="20 6 9 17 4 12"></polyline>
@@ -108,16 +92,11 @@ export default function App() {
           </div>
         ) : (
           /* Login Card Form */
-          <div className="w-full max-w-md bg-slate-900/80 backdrop-blur-xl border border-slate-800 p-6 sm:p-8 rounded-2xl shadow-2xl relative">
+          <div className="login-card w-full max-w-md bg-slate-900/80 backdrop-blur-xl border border-slate-800 p-6 sm:p-8 rounded-2xl shadow-2xl relative">
             
-            {/* Top Security Pill Badge */}
-            <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-slate-800 border border-slate-700/80 text-slate-300 text-[11px] px-4 py-1 rounded-full uppercase tracking-widest font-semibold shadow-md">
-              Acceso Restringido
-            </div>
-
             <div className="text-center mt-3 mb-6">
-              <h2 className="text-2xl font-bold tracking-tight text-white">Iniciar Sesión</h2>
-              <p className="text-xs sm:text-sm text-slate-400 mt-1">Ingrese sus credenciales corporativas autorizadas</p>
+              <h2 className="text-2xl font-bold tracking-tight text-white">Bienvenido</h2>
+              <p className="text-xs sm:text-sm text-slate-400 mt-1">Accede a tu cuenta para continuar</p>
             </div>
 
             {/* Error banner */}
@@ -136,9 +115,11 @@ export default function App() {
               
               {/* Email / Username Input */}
               <div>
-                <label className="block text-xs sm:text-sm font-medium text-slate-300 mb-1.5">
-                  Correo Electrónico o Usuario ID
-                </label>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="block text-xs sm:text-sm font-medium text-slate-300">
+                    Correo Electrónico
+                  </label>
+                </div>
                 <div className="relative">
                   <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -151,7 +132,7 @@ export default function App() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="ej. analista.soc@empresa.com"
-                    className="w-full pl-10 pr-4 py-3 bg-slate-950/70 border border-slate-700/80 rounded-xl text-slate-100 placeholder-slate-500 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all shadow-inner"
+                    className="login-input w-full pl-10 pr-4 py-3 bg-slate-950/70 border border-slate-700/80 rounded-xl text-slate-100 placeholder-slate-500 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all shadow-inner"
                   />
                 </div>
               </div>
@@ -182,7 +163,7 @@ export default function App() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••••••"
-                    className="w-full pl-10 pr-11 py-3 bg-slate-950/70 border border-slate-700/80 rounded-xl text-slate-100 placeholder-slate-500 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all shadow-inner"
+                    className="login-input w-full pl-10 pr-11 py-3 bg-slate-950/70 border border-slate-700/80 rounded-xl text-slate-100 placeholder-slate-500 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all shadow-inner"
                   />
                   <button
                     type="button"
@@ -203,19 +184,6 @@ export default function App() {
                 </div>
               </div>
 
-              {/* Remember device checkbox */}
-              <div className="flex items-center justify-between text-xs sm:text-sm">
-                <label className="flex items-center space-x-2.5 cursor-pointer select-none">
-                  <input
-                    type="checkbox"
-                    checked={rememberDevice}
-                    onChange={(e) => setRememberDevice(e.target.checked)}
-                    className="w-4 h-4 rounded bg-slate-950 border-slate-700 text-emerald-600 focus:ring-emerald-500 focus:ring-offset-slate-900"
-                  />
-                  <span className="text-slate-300">Confiar en este dispositivo (30 días)</span>
-                </label>
-              </div>
-
               {/* Submit button */}
               <button
                 type="submit"
@@ -232,7 +200,7 @@ export default function App() {
                   </>
                 ) : (
                   <>
-                    <span>Acceder al Dashboard</span>
+                    <span>Ingresar</span>
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3" />
                     </svg>
@@ -241,28 +209,14 @@ export default function App() {
               </button>
             </form>
 
-            {/* Quick Demo Helper */}
-            <div className="mt-6 pt-5 border-t border-slate-800/80 text-center">
-              <p className="text-[11px] text-slate-400 mb-2">¿Quieres probar el acceso rápidamente?</p>
-              <button
-                type="button"
-                onClick={fillDemo}
-                className="inline-flex items-center space-x-2 text-xs font-medium text-emerald-400 bg-emerald-950/40 border border-emerald-900/60 hover:bg-emerald-900/40 px-3.5 py-1.5 rounded-lg transition-all"
-              >
-                <svg className="w-3.5 h-3.5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
-                </svg>
-                <span>Autocompletar Credenciales de Demo</span>
-              </button>
-            </div>
           </div>
         )}
       </main>
 
       {/* Forgot Password Modal / Drawer */}
       {showRecovery && (
-        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn">
-          <div className="bg-slate-900 border border-slate-800 max-w-md w-full p-6 sm:p-8 rounded-2xl shadow-2xl relative">
+        <div className="login-recovery-overlay fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn">
+          <div className="login-recovery-card bg-slate-900 border border-slate-800 max-w-md w-full p-6 sm:p-8 rounded-2xl shadow-2xl relative">
             <button
               onClick={() => { setShowRecovery(false); setRecoverySent(false); }}
               className="absolute top-4 right-4 text-slate-400 hover:text-white transition-colors"
@@ -297,7 +251,7 @@ export default function App() {
                     value={recoveryEmail}
                     onChange={(e) => setRecoveryEmail(e.target.value)}
                     placeholder="analista@empresa.com"
-                    className="w-full px-4 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-slate-100 placeholder-slate-500 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    className="login-input w-full px-4 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-slate-100 placeholder-slate-500 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   />
                 </div>
                 <div className="flex space-x-3 pt-2">
@@ -322,7 +276,7 @@ export default function App() {
       )}
 
       {/* Footer */}
-      <footer className="w-full py-5 text-center text-[11px] text-slate-500 border-t border-slate-900/80 z-10">
+      <footer className="login-footer w-full py-5 text-center text-[11px] text-slate-500 border-t border-slate-900/80 z-10">
         <p>&copy; 2026 PCiberseguridadIC. Todos los derechos reservados. Sistema Centralizado de Incidentes.</p>
       </footer>
     </div>

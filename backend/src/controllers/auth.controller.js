@@ -32,7 +32,8 @@ async function iniciarSesion(req, res, next) {
         nombre: usuario.nombre,
         apellido: usuario.apellido,
         email: usuario.email,
-        rol: usuario.rol
+        rol: usuario.rol,
+        status: usuario.status
       }
     });
   } catch (error) {

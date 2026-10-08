@@ -7,18 +7,30 @@ const camposPublicos = {
   apellido: true,
   email: true,
   rol: true,
+  status: true,
+  deletedAt: true,
   createdAt: true,
   updatedAt: true
 };
 
-async function prepararDatos(datos) {
-  return {
+async function prepararDatos(datos, incluirPassword = true) {
+  const datosPreparados = {
     nombre: datos.nombre,
     apellido: datos.apellido,
     email: datos.email,
-    password: await bcrypt.hash(datos.password, 12),
-    rol: datos.rol
+    rol: datos.rol,
+    status: datos.status
   };
+
+  if (datos.status !== undefined) {
+    datosPreparados.deletedAt = datos.status === "DELETED" ? new Date() : null;
+  }
+
+  if (incluirPassword || datos.password) {
+    datosPreparados.password = await bcrypt.hash(datos.password, 12);
+  }
+
+  return datosPreparados;
 }
 
 function listar() {
@@ -42,13 +54,24 @@ async function crear(datos) {
 async function actualizar(id, datos) {
   return prisma.usuario.update({
     where: { id },
-    data: await prepararDatos(datos),
+    data: await prepararDatos(datos, false),
     select: camposPublicos
   });
 }
 
 function eliminar(id) {
-  return prisma.usuario.delete({ where: { id } });
+  return actualizarEstado(id, "DELETED");
 }
 
-module.exports = { listar, buscarPorId, crear, actualizar, eliminar };
+function actualizarEstado(id, status) {
+  return prisma.usuario.update({
+    where: { id },
+    data: {
+      status,
+      deletedAt: status === "DELETED" ? new Date() : null
+    },
+    select: camposPublicos
+  });
+}
+
+module.exports = { listar, buscarPorId, crear, actualizar, actualizarEstado, eliminar };
