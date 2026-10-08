@@ -6,7 +6,6 @@ import UsuariosFueraServicio from "./components/UsuariosFueraServicio";
 import Login from "./components/Login"; // Asegúrate de que este archivo exista en src/components/Login.jsx
 import {
   obtenerIncidentes,
-  obtenerIncidentePorId,
   crearIncidente,
   actualizarIncidente,
   eliminarIncidente
@@ -133,8 +132,6 @@ function Dashboard() {
       throw err;
     }
   };
-
-  const buscarIncidentePorId = (id) => obtenerIncidentePorId(id);
 
   const incidentesCriticos = incidentes.filter((incidente) => {
     const prioridad = (incidente.prioridad || '').toLowerCase();
@@ -298,7 +295,6 @@ function Dashboard() {
                     incidentes={incidentes}
                     onGuardar={guardarIncidente}
                     onEliminar={borrarIncidente}
-                    onBuscarPorId={buscarIncidentePorId}
                     filtros={filtros}
                     onFiltrosChange={setFiltros}
                     puedeCrear={puedeCrearIncidentes}

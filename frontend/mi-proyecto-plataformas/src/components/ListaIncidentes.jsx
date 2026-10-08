@@ -1,10 +1,65 @@
 import { useEffect, useState } from 'react';
 
+const tiposIncidente = [
+  'Phishing',
+  'Malware',
+  'Ransomware',
+  'Fuerza bruta',
+  'Acceso no autorizado',
+  'Fuga de información',
+  'Denegación de servicio',
+  'Ingeniería social',
+  'Otro'
+];
+
+const mensajeTextoInvalido = 'Debe ser una palabra o frase legible, no una secuencia aleatoria de letras o números.';
+const mensajeContenidoPeligroso = 'No se permiten etiquetas HTML ni patrones de inyección en este campo.';
+
+const patronesContenidoPeligroso = [
+  /<\s*\/?\s*[a-z][^>]*>/iu,
+  /\bon[a-z]+\s*=/iu,
+  /\b(?:javascript|vbscript)\s*:/iu,
+  /\bdata\s*:\s*text\/html/iu,
+  /(?:--|\/\*|\*\/)/u,
+  /;\s*(?:select|insert|update|delete|drop|alter|create|truncate|exec(?:ute)?|union)\b/iu,
+  /\bunion\s+(?:all\s+)?select\b/iu,
+  /\bselec(?:t)?\s+from\b/iu,
+  /\b(?:select\b[\s\S]*?\bfrom\b|insert\s+into|update\s+\w+\s+set|delete\s+from|drop\s+(?:table|database)|exec(?:ute)?\s*\()/iu,
+  /['"`]\s*(?:or|and)\s+['"`]?\w+['"`]?\s*=\s*['"`]?\w+['"`]?/iu,
+  /\b(?:or|and)\s+1\s*=\s*1\b/iu
+];
+
+function contienePatronDeInyeccion(valor) {
+  return patronesContenidoPeligroso.some((patron) => patron.test(valor));
+}
+
+function esTextoLegible(valor) {
+  const texto = valor.trim().normalize('NFD').replace(/\p{M}/gu, '').toLowerCase();
+  if (
+    !/\p{L}/u.test(texto)
+    || /([\p{L}\p{N}])\1{3,}/u.test(texto)
+    || /qwerty|asdf|zxcv|qazwsx|123456|654321/u.test(texto)
+  ) return false;
+
+  const palabras = texto.match(/[\p{L}\p{N}]+/gu) || [];
+  return palabras.every((palabra) => {
+    if (palabra.length < 8) return true;
+
+    const letras = [...palabra].filter((caracter) => /\p{L}/u.test(caracter));
+    if (letras.length / palabra.length < 0.7) return false;
+
+    const letrasUnicas = new Set(letras);
+    if (letrasUnicas.size / letras.length < 0.45) return false;
+
+    const vocales = letras.filter((letra) => 'aeiou'.includes(letra)).length;
+    return vocales / letras.length >= 0.12;
+  });
+}
+
 function ListaIncidentes({
   incidentes,
   onGuardar,
   onEliminar,
-  onBuscarPorId,
   filtros,
   onFiltrosChange,
   puedeCrear = false,
@@ -12,9 +67,6 @@ function ListaIncidentes({
   puedeEliminar = false
 }) {
   const [busqueda, setBusqueda] = useState('');
-  const [resultadoPorId, setResultadoPorId] = useState(null);
-  const [buscandoPorId, setBuscandoPorId] = useState(false);
-  const [errorBusqueda, setErrorBusqueda] = useState('');
   const [filtroPrioridad, setFiltroPrioridad] = useState(filtros?.prioridad || '');
   const [filtroEstado, setFiltroEstado] = useState(filtros?.estado || '');
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
@@ -81,7 +133,7 @@ function ListaIncidentes({
 
     const camposObligatorios = [
       { nombre: 'El título', valor: formData.tituloIncidente, minimo: 5 },
-      { nombre: 'El tipo', valor: formData.tipo, minimo: 2 },
+      { nombre: 'El tipo', valor: formData.tipo },
       { nombre: 'La descripción', valor: formData.descripcion, minimo: 10 }
     ];
 
@@ -99,6 +151,31 @@ function ListaIncidentes({
       }
     }
 
+    const camposTexto = [
+      { nombre: 'El título', valor: formData.tituloIncidente },
+      { nombre: 'El sistema afectado', valor: formData.sistemaAfectado },
+      { nombre: 'La evidencia', valor: formData.evidencia },
+      { nombre: 'La descripción', valor: formData.descripcion }
+    ];
+    const campoTextoInvalido = camposTexto.find(
+      (campo) => {
+        const valor = String(campo.valor || '').trim();
+        return valor && !esTextoLegible(valor);
+      }
+    );
+    const campoConInyeccion = camposTexto.find(
+      (campo) => contienePatronDeInyeccion(String(campo.valor || ''))
+    );
+    if (campoConInyeccion) {
+      setToastValidacion({ mensaje: `${campoConInyeccion.nombre}: ${mensajeContenidoPeligroso}` });
+      return;
+    }
+
+    if (campoTextoInvalido) {
+      setToastValidacion({ mensaje: `${campoTextoInvalido.nombre}: ${mensajeTextoInvalido}` });
+      return;
+    }
+
     setToastValidacion(null);
     if (!onGuardar) return;
 
@@ -111,32 +188,6 @@ function ListaIncidentes({
     } finally {
       setGuardando(false);
     }
-  };
-
-  const buscar = async (e) => {
-    e.preventDefault();
-    const texto = busqueda.trim();
-    setErrorBusqueda('');
-    setResultadoPorId(null);
-
-    if (!texto || !/^\d+$/.test(texto)) return;
-    if (!onBuscarPorId) return;
-
-    setBuscandoPorId(true);
-    try {
-      const incidente = await onBuscarPorId(texto);
-      setResultadoPorId(incidente);
-    } catch (err) {
-      setErrorBusqueda(err.message);
-    } finally {
-      setBuscandoPorId(false);
-    }
-  };
-
-  const limpiarBusqueda = () => {
-    setBusqueda('');
-    setResultadoPorId(null);
-    setErrorBusqueda('');
   };
 
   const confirmarEliminacion = async () => {
@@ -154,11 +205,12 @@ function ListaIncidentes({
   };
 
   // Filtrado dinámico
-  const incidentesFiltrados = (resultadoPorId ? [resultadoPorId] : incidentes).filter((incidente) => {
-    const coincideTexto = Boolean(resultadoPorId) ||
-      (incidente.tituloIncidente || '').toLowerCase().includes(busqueda.toLowerCase()) ||
-      (incidente.tipo || '').toLowerCase().includes(busqueda.toLowerCase()) ||
-      (incidente.descripcion || '').toLowerCase().includes(busqueda.toLowerCase());
+  const terminoBusqueda = busqueda.trim().toLowerCase();
+  const incidentesFiltrados = incidentes.filter((incidente) => {
+    const coincideTexto = String(incidente.id || '').toLowerCase().includes(terminoBusqueda) ||
+      (incidente.tituloIncidente || '').toLowerCase().includes(terminoBusqueda) ||
+      (incidente.tipo || '').toLowerCase().includes(terminoBusqueda) ||
+      (incidente.descripcion || '').toLowerCase().includes(terminoBusqueda);
 
     const coincidePrioridad = filtroPrioridad === '' || incidente.prioridad === filtroPrioridad;
 
@@ -187,28 +239,23 @@ function ListaIncidentes({
       
       {/* Barra superior: Botón + Búsqueda + Filtro */}
       <div className="incidentes-toolbar">
-        <form onSubmit={buscar} className="incidentes-search">
+        <label className="incidentes-search">
+          <span className="visually-hidden">Buscar incidentes por título o tipo</span>
           <input 
             type="search" 
-            placeholder="Buscar por título, tipo o ID..." 
+            placeholder="Buscar por título o tipo..."
             value={busqueda}
             onChange={(e) => {
               setBusqueda(e.target.value);
-              if (!e.target.value.trim()) limpiarBusqueda();
             }}
             className="incidentes-search__input"
             style={{ ...inputStyle, marginTop: 0 }}
           />
-          <button type="submit" disabled={buscandoPorId} className="incidentes-search__button">
-            <span className="sr-only">{buscandoPorId ? 'Buscando...' : 'Buscar por ID'}</span>
-            <svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <circle cx="11" cy="11" r="7" />
-              <path d="m20 20-4-4" />
-            </svg>
-          </button>
-        </form>
-
-        {errorBusqueda && <span style={{ color: '#dc3545' }}>{errorBusqueda}</span>}
+          <svg className="incidentes-search__icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <circle cx="11" cy="11" r="7" />
+            <path d="m20 20-4-4" />
+          </svg>
+        </label>
 
         <select 
           value={filtroPrioridad}
@@ -276,16 +323,18 @@ function ListaIncidentes({
               <div className="flex flex-col gap-2 sm:flex-row">
                 <div style={{ ...formGroupStyle, flex: 1 }}>
                   <label>Tipo:</label>
-                  <input 
-                    type="text" 
-                    name="tipo" 
-                    value={formData.tipo} 
-                    onChange={handleChange} 
-                    required 
-                    minLength={2}
-                    placeholder="Ej. Phishing" 
+                  <select
+                    name="tipo"
+                    value={formData.tipo}
+                    onChange={handleChange}
+                    required
                     style={inputStyle}
-                  />
+                  >
+                    <option value="" disabled>Seleccionar tipo</option>
+                    {tiposIncidente.map((tipo) => (
+                      <option key={tipo} value={tipo}>{tipo}</option>
+                    ))}
+                  </select>
                 </div>
                 <div style={{ ...formGroupStyle, flex: 1 }}>
                   <label>Sistema Afectado:</label>
@@ -345,7 +394,7 @@ function ListaIncidentes({
                 />
               </div>
 
-              <div className="flex flex-col justify-end gap-2 pt-3 sm:flex-row" style={{ marginTop: '15px' }}>
+              <div className="incident-modal-actions flex flex-col justify-end gap-2 pt-3 sm:flex-row" style={{ marginTop: '15px' }}>
                 <button 
                   type="button" 
                   onClick={cerrarFormulario}
@@ -461,7 +510,7 @@ function ListaIncidentes({
               <p><strong>Título:</strong> {incidenteAEliminar.tituloIncidente || 'Sin título'}</p>
               <p><strong>Prioridad:</strong> {incidenteAEliminar.prioridad || 'Sin prioridad'}</p>
             </div>
-            <div className="flex flex-col justify-end gap-2 sm:flex-row">
+            <div className="incident-modal-actions flex flex-col justify-end gap-2 sm:flex-row">
               <button
                 type="button"
                 onClick={() => setIncidenteAEliminar(null)}

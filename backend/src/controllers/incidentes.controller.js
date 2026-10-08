@@ -44,6 +44,7 @@ async function listar(req, res, next) {
   try {
     const incidentes = await incidenteService.listar({
       usuarioId: Number(req.usuario.sub),
+      rol: req.usuario.rol,
       estado,
       prioridad
     });
@@ -62,7 +63,8 @@ async function obtener(req, res, next) {
   try {
     const incidente = await incidenteService.buscarPorId(
       id,
-      Number(req.usuario.sub)
+      Number(req.usuario.sub),
+      req.usuario.rol
     );
     if (!incidente) {
       return res.status(404).json({ error: "Incidente no encontrado" });
@@ -95,7 +97,8 @@ async function actualizar(req, res, next) {
     const incidente = await incidenteService.actualizar(
       id,
       Number(req.usuario.sub),
-      datosIncidente(req.body)
+      datosIncidente(req.body),
+      req.usuario.rol
     );
     res.json(seleccionarIncidente(incidente));
   } catch (error) {
@@ -110,7 +113,7 @@ async function eliminar(req, res, next) {
   }
 
   try {
-    await incidenteService.eliminar(id, Number(req.usuario.sub));
+    await incidenteService.eliminar(id, Number(req.usuario.sub), req.usuario.rol);
     res.status(204).send();
   } catch (error) {
     next(error);

@@ -1,11 +1,17 @@
 const { z } = require("zod");
 
+const rolSchema = z.string()
+  .trim()
+  .transform((rol) => rol.toLowerCase())
+  .pipe(z.enum(["administrador", "analista", "supervisor"]))
+  .transform((rol) => `${rol[0].toUpperCase()}${rol.slice(1)}`);
+
 const usuarioSchema = z.object({
   nombre: z.string().trim().min(1).max(100),
   apellido: z.string().trim().min(1).max(100),
   email: z.string().trim().email().max(100).transform((email) => email.toLowerCase()),
   password: z.string().min(8),
-  rol: z.string().trim().min(1).max(50),
+  rol: rolSchema,
   status: z.enum(["PENDING", "ACTIVE", "SUSPENDED", "DELETED"]).optional()
 });
 

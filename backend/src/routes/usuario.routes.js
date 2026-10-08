@@ -1,8 +1,13 @@
 const router = require("express").Router();
 const controller = require("../controllers/usuario.controller");
 const { validar } = require("../middlewares/validate.middleware");
+const { verificarToken } = require("../middlewares/auth.middleware");
+const { requiereRol } = require("../middlewares/requiereRol");
 const { validarIdUsuario } = require("../middlewares/usuario.middleware");
 const { usuarioSchema, actualizarUsuarioSchema, estadoUsuarioSchema } = require("../schemas/usuario.schema");
+
+router.use(verificarToken);
+router.use(requiereRol("administrador"));
 
 router.get("/", controller.listar);
 router.get("/:id", validarIdUsuario, controller.obtener);

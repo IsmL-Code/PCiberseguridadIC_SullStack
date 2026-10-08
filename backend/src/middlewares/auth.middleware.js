@@ -1,4 +1,5 @@
 const jwt = require("jsonwebtoken");
+const { obtenerSecretoJwt } = require("../config/jwt");
 
 function validarCredenciales(req, res, next) {
   if (!req.body || typeof req.body !== "object" || Array.isArray(req.body)) {
@@ -29,7 +30,7 @@ function verificarToken(req, res, next) {
   try {
     req.usuario = jwt.verify(
       token,
-      process.env.JWT_SECRET || "clave-desarrollo-cambiar-en-produccion"
+      obtenerSecretoJwt()
     );
     next();
   } catch {
