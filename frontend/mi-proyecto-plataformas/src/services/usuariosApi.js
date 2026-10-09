@@ -1,3 +1,5 @@
+import { fetchConSesion } from "./fetchConSesion";
+
 const API_URL = `${import.meta.env.VITE_API_URL || "http://localhost:3000"}/api/usuarios`;
 
 function encabezadosAutenticacion() {
@@ -24,12 +26,12 @@ async function procesarRespuesta(respuesta, mensajeError) {
 }
 
 export async function listarUsuarios() {
-  const respuesta = await fetch(API_URL, { headers: encabezadosAutenticacion() });
+  const respuesta = await fetchConSesion(API_URL, { headers: encabezadosAutenticacion() });
   return procesarRespuesta(respuesta, "No se pudo obtener la lista de usuarios");
 }
 
 export async function crearUsuario(datosUsuario) {
-  const respuesta = await fetch(API_URL, {
+  const respuesta = await fetchConSesion(API_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json", ...encabezadosAutenticacion() },
     body: JSON.stringify(datosUsuario)
@@ -39,7 +41,7 @@ export async function crearUsuario(datosUsuario) {
 }
 
 export async function actualizarUsuario(id, datosUsuario) {
-  const respuesta = await fetch(`${API_URL}/${id}`, {
+  const respuesta = await fetchConSesion(`${API_URL}/${id}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json", ...encabezadosAutenticacion() },
     body: JSON.stringify(datosUsuario)
@@ -49,7 +51,7 @@ export async function actualizarUsuario(id, datosUsuario) {
 }
 
 export async function actualizarEstadoUsuario(id, status) {
-  const respuesta = await fetch(`${API_URL}/${id}/estado`, {
+  const respuesta = await fetchConSesion(`${API_URL}/${id}/estado`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json", ...encabezadosAutenticacion() },
     body: JSON.stringify({ status })
@@ -59,7 +61,7 @@ export async function actualizarEstadoUsuario(id, status) {
 }
 
 export async function eliminarUsuario(id) {
-  const respuesta = await fetch(`${API_URL}/${id}`, {
+  const respuesta = await fetchConSesion(`${API_URL}/${id}`, {
     method: "DELETE",
     headers: encabezadosAutenticacion()
   });

@@ -146,3 +146,31 @@ test("8. no autoriza navegadores de orígenes CORS no permitidos", async () => {
   assert.equal(respuesta.headers.get("access-control-allow-origin"), null);
   assert.equal(respuesta.status, 200);
 });
+
+test("9. normaliza el tipo heredado Doss para permitir editar el incidente", async () => {
+  const incidenteHeredado = {
+    ...datosValidos,
+    id: siguienteId++,
+    tipo: "Doss",
+    createdAt: new Date(),
+    usuarioId: 7
+  };
+  registros.push(incidenteHeredado);
+
+  const listaRespuesta = await solicitar("/");
+  assert.equal(listaRespuesta.status, 200);
+  assert.equal((await listaRespuesta.json())[0].tipo, "Denegación de servicio");
+
+  const actualizadoRespuesta = await solicitar(`/${incidenteHeredado.id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      ...datosValidos,
+      tipo: "Denegación de servicio",
+      tituloIncidente: "Ataque de servicio confirmado"
+    })
+  });
+  assert.equal(actualizadoRespuesta.status, 200);
+  assert.equal((await actualizadoRespuesta.json()).tipo, "Denegación de servicio");
+  assert.equal(registros[0].tipo, "Denegación de servicio");
+});

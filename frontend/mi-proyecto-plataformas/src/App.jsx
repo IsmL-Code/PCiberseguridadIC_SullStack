@@ -317,7 +317,22 @@ function Dashboard() {
 
 // Componente de protección de ruta privada
 function RutaPrivada({ children }) {
-  const estaAutenticado = localStorage.getItem("isAuthenticated") === "true";
+  const navigate = useNavigate();
+  const estaAutenticado = localStorage.getItem("isAuthenticated") === "true"
+    && Boolean(localStorage.getItem("authToken"));
+
+  useEffect(() => {
+    const manejarSesionExpirada = () => {
+      localStorage.removeItem("isAuthenticated");
+      localStorage.removeItem("authToken");
+      localStorage.removeItem("usuario");
+      navigate("/login", { replace: true });
+    };
+
+    window.addEventListener("auth:session-expired", manejarSesionExpirada);
+    return () => window.removeEventListener("auth:session-expired", manejarSesionExpirada);
+  }, [navigate]);
+
   return estaAutenticado ? children : <Navigate to="/login" />;
 }
 

@@ -439,10 +439,13 @@ export default function RegistroUsuarios() {
             aria-labelledby="titulo-eliminar-usuario"
             aria-describedby="detalle-eliminar-usuario"
           >
-            <h3 id="titulo-eliminar-usuario">¿Marcar fuera de servicio este usuario?</h3>
-            <p id="detalle-eliminar-usuario">
-              Se marcará fuera de servicio a <strong>{usuarioAEliminar.nombre} {usuarioAEliminar.apellido}</strong>. El registro se conservará para consulta.
-            </p>
+            <h3 id="titulo-eliminar-usuario">¿Está seguro de marcar fuera de servicio este usuario?</h3>
+            <p id="detalle-eliminar-usuario">El usuario dejará de estar activo y su registro se conservará para consulta.</p>
+            <div className="user-delete-dialog__details">
+              <p><strong>ID:</strong> {usuarioAEliminar.id}</p>
+              <p><strong>Nombre:</strong> {`${usuarioAEliminar.nombre || ""} ${usuarioAEliminar.apellido || ""}`.trim() || "—"}</p>
+              <p><strong>Correo:</strong> {usuarioAEliminar.email || "—"}</p>
+            </div>
             <div className="user-delete-dialog__actions">
               <button type="button" className="user-form__cancel user-delete-dialog__cancel" onClick={() => setUsuarioAEliminar(null)} disabled={eliminando}>
                 Cancelar

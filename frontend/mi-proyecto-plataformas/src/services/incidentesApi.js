@@ -1,3 +1,5 @@
+import { fetchConSesion } from "./fetchConSesion";
+
 const API_URL = `${import.meta.env.VITE_API_URL || "http://localhost:3000"}/api/incidentes`;
 
 function encabezadosAutenticacion() {
@@ -28,18 +30,18 @@ export async function obtenerIncidentes(filtros = {}) { //[cite: 5]
   if (filtros.estado) parametros.set("estado", filtros.estado);
   if (filtros.prioridad) parametros.set("prioridad", filtros.prioridad);
   const query = parametros.toString();
-  const respuesta = await fetch(`${API_URL}${query ? `?${query}` : ""}`, { headers: encabezadosAutenticacion() }); //[cite: 5]
+  const respuesta = await fetchConSesion(`${API_URL}${query ? `?${query}` : ""}`, { headers: encabezadosAutenticacion() }); //[cite: 5]
   return procesarRespuesta(respuesta, "No se pudo obtener la lista de incidentes");
 }
 
 export async function obtenerIncidentePorId(id) {
-  const respuesta = await fetch(`${API_URL}/${id}`, { headers: encabezadosAutenticacion() });
+  const respuesta = await fetchConSesion(`${API_URL}/${id}`, { headers: encabezadosAutenticacion() });
   return procesarRespuesta(respuesta, "No se pudo obtener el incidente");
 }
 
 // Nueva función para enviar el nuevo registro al backend
 export async function crearIncidente(datosNuevoIncidente) {
-  const respuesta = await fetch(API_URL, {
+  const respuesta = await fetchConSesion(API_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json", ...encabezadosAutenticacion() },
     body: JSON.stringify(datosNuevoIncidente)
@@ -49,7 +51,7 @@ export async function crearIncidente(datosNuevoIncidente) {
 }
 
 export async function actualizarIncidente(id, datosIncidente) {
-  const respuesta = await fetch(`${API_URL}/${id}`, {
+  const respuesta = await fetchConSesion(`${API_URL}/${id}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json", ...encabezadosAutenticacion() },
     body: JSON.stringify(datosIncidente)
@@ -59,7 +61,7 @@ export async function actualizarIncidente(id, datosIncidente) {
 }
 
 export async function eliminarIncidente(id) {
-  const respuesta = await fetch(`${API_URL}/${id}`, {
+  const respuesta = await fetchConSesion(`${API_URL}/${id}`, {
     method: "DELETE",
     headers: encabezadosAutenticacion()
   });

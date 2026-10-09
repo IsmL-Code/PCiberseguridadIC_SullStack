@@ -1,5 +1,9 @@
 const incidenteService = require("../services/incidente.service");
 
+const tiposIncidenteLegacy = {
+  doss: "Denegación de servicio"
+};
+
 function obtenerIdValido(id) {
   const idNumerico = Number(id);
   return Number.isInteger(idNumerico) && idNumerico > 0 ? idNumerico : null;
@@ -8,6 +12,7 @@ function obtenerIdValido(id) {
 function seleccionarIncidente(incidente) {
   return {
     ...incidente,
+    tipo: tiposIncidenteLegacy[incidente.tipo?.trim().toLocaleLowerCase("es")] || incidente.tipo,
     fechaCreacion: incidente.createdAt.toISOString().slice(0, 10)
   };
 }
