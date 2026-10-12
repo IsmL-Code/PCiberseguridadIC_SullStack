@@ -9,7 +9,7 @@ if (process.env.NODE_ENV === "production") {
   }
 }
 const app = require("./app");
-const prisma = require("./config/prisma");
+const prisma = require("./database/prisma");
 const servidor = app.listen(process.env.PORT || 3000, () => {
  console.log("API disponible en http://localhost:3000");
 });

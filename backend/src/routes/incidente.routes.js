@@ -3,7 +3,7 @@ const controller = require("../controllers/incidentes.controller");
 const { validar } = require("../middlewares/validate.middleware");
 const { verificarToken } = require("../middlewares/auth.middleware");
 const { requierePermiso } = require("../middlewares/requiereRol");
-const { incidenteSchema } = require("../schemas/incidente.schema");
+const { incidenteSchema } = require("../models/incidente.schema");
 
 router.use(verificarToken);
 

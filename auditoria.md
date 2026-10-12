@@ -1,4 +1,4 @@
-# Informe de seguridad, pruebas y mejoras
+﻿# Informe de seguridad, pruebas y mejoras
 
 ## Alcance y situación inicial
 
@@ -20,7 +20,7 @@ Se documentó HTTPS para despliegue: usar un proxy inverso o entrada administrad
 
 ## Pruebas y evidencias
 
-Se agregaron ocho pruebas HTTP automatizadas con `node:test` en `backend/test/incidentes.api.test.js`. La suite utiliza servicios de persistencia en memoria para no alterar una base compartida, pero recorre Express, JWT, permisos, validación, controladores y respuestas HTTP. Los escenarios y resultados son:
+Se agregaron ocho pruebas HTTP automatizadas con `node:test` en `backend/tests/incidentes.api.test.js`. La suite utiliza servicios de persistencia en memoria para no alterar una base compartida, pero recorre Express, JWT, permisos, validación, controladores y respuestas HTTP. Los escenarios y resultados son:
 
 | Caso | Comprobación | Resultado esperado |
 |---|---|---|
@@ -33,7 +33,7 @@ Se agregaron ocho pruebas HTTP automatizadas con `node:test` en `backend/test/in
 | 7 | Filtro con estado inválido | 400 |
 | 8 | Origen web no permitido | Sin encabezado CORS de autorización |
 
-La ejecución verificada de `npm test` reportó ocho casos aprobados y cero fallidos. El ciclo CRUD ejercita la ruta de API; el cliente React consume esas mismas operaciones en `frontend/mi-proyecto-plataformas/src/services/incidentesApi.js`. Para verificar el frontend se ejecutan `npm run lint` y `npm run build` desde su directorio; ambas comprobaciones pasaron después de los cambios. El backend se prueba desde `backend` con `npm test`. El archivo `backend/test/evidencias.md` resume los resultados; no se atribuyen capturas inexistentes.
+La ejecución verificada de `npm test` reportó ocho casos aprobados y cero fallidos. El ciclo CRUD ejercita la ruta de API; el cliente React consume esas mismas operaciones en `frontend/mi-proyecto-plataformas/src/services/incidentesApi.js`. Para verificar el frontend se ejecutan `npm run lint` y `npm run build` desde su directorio; ambas comprobaciones pasaron después de los cambios. El backend se prueba desde `backend` con `npm test`. El archivo `backend/tests/evidencias.md` resume los resultados; no se atribuyen capturas inexistentes.
 
 ## Riesgos pendientes
 
@@ -44,3 +44,20 @@ Antes de publicar, configure `JWT_SECRET` mediante el gestor de secretos, defina
 ## Conclusión
 
 El repositorio ahora incluye controles JWT y por rol, contraseñas bcrypt migrables, clave segura sin valor fijo, CORS por ambiente, validación de servidor y ocho pruebas automatizadas, incluido el ciclo CRUD y errores de acceso. HTTPS queda documentado como requisito de infraestructura, no como una capacidad ya demostrada del servidor local. La entrega debe incluir este informe, el código y las salidas reales de pruebas. La suite permite repetir la evidencia y detectar regresiones.
+
+## Problemas detectados (revisión actual)
+
+**Backend**
+- El login no limita intentos: permite fuerza bruta.
+- No hay cabeceras de seguridad (helmet) ni límite de peticiones ni de tamaño del cuerpo.
+- `verificarToken` solo valida la firma: un usuario suspendido o eliminado conserva acceso hasta 8 h (expira el JWT) y no existe revocación de tokens.
+- No hay registro de auditoría de eventos (login, borrados, cambios de rol); solo `console.error`.
+- Las pruebas usan datos simulados: no cubren MySQL real, el borrado lógico ni usuarios.
+- La validación de usuarios está duplicada entre controlador y esquema Zod.
+
+**Frontend**
+- El token JWT y el usuario se guardan en `localStorage`: expuestos ante XSS; el rol guardado es manipulable (solo afecta la interfaz).
+- No hay CSP ni protección equivalente.
+- Abundan estilos en línea y reglas CSS duplicadas entre `index.css` y `theme.css`.
+- La lista de incidentes no tiene paginación.
+- No existen pruebas de componentes ni de navegador.

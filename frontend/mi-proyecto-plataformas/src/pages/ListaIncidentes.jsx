@@ -90,8 +90,7 @@ function ListaIncidentes({
     sistemaAfectado: '',
     prioridad: 'MEDIA',
     estado: 'ABIERTO',
-    descripcion: '',
-    evidencia: ''
+    descripcion: ''
   });
 
   // Manejar el cambio en los inputs del formulario
@@ -111,8 +110,7 @@ function ListaIncidentes({
       sistemaAfectado: '',
       prioridad: 'MEDIA',
       estado: 'ABIERTO',
-      descripcion: '',
-      evidencia: ''
+      descripcion: ''
     });
     setMostrarFormulario(true);
   };
@@ -154,7 +152,6 @@ function ListaIncidentes({
     const camposTexto = [
       { nombre: 'El título', valor: formData.tituloIncidente },
       { nombre: 'El sistema afectado', valor: formData.sistemaAfectado },
-      { nombre: 'La evidencia', valor: formData.evidencia },
       { nombre: 'La descripción', valor: formData.descripcion }
     ];
     const campoTextoInvalido = camposTexto.find(
@@ -305,7 +302,7 @@ function ListaIncidentes({
       {mostrarFormulario && (
         <div className="p-3" style={modalOverlayStyle}>
           <div className="max-h-[90vh] overflow-y-auto" style={modalContentStyle}>
-            <h2 style={{ marginTop: 0, color: '#111827' }}>{incidenteEnEdicion ? 'Editar Incidente' : 'Crear Nuevo Incidente'}</h2>
+            <h2 style={{ marginTop: 0, color: 'var(--dlg-title)' }}>{incidenteEnEdicion ? 'Editar Incidente' : 'Crear Nuevo Incidente'}</h2>
             <form onSubmit={handleSubmit} noValidate>
               <div style={formGroupStyle}>
                 <label>Título del Incidente:</label>
@@ -370,18 +367,6 @@ function ListaIncidentes({
               </div>
 
               <div style={formGroupStyle}>
-                <label>Evidencia:</label>
-                <input 
-                  type="text" 
-                  name="evidencia" 
-                  value={formData.evidencia} 
-                  onChange={handleChange} 
-                  placeholder="Ej. captura.png" 
-                  style={inputStyle}
-                />
-              </div>
-
-              <div style={formGroupStyle}>
                 <label>Descripción:</label>
                 <textarea 
                   name="descripcion" 
@@ -399,13 +384,13 @@ function ListaIncidentes({
                   type="button" 
                   onClick={cerrarFormulario}
                   disabled={guardando}
-                  style={{ padding: '8px 16px', borderRadius: '4px', border: '1px solid #ccc', cursor: 'pointer', backgroundColor: '#e2e8f0', color: '#333' }}
+                  style={{ padding: '8px 16px', borderRadius: '4px', border: '1px solid var(--dlg-input-border)', cursor: 'pointer', backgroundColor: 'var(--dlg-cancel-bg)', color: 'var(--dlg-cancel-text)' }}
                 >
                   Cancelar
                 </button>
                 <button 
                   type="submit" 
-                  style={{ padding: '8px 16px', borderRadius: '4px', border: 'none', backgroundColor: '#28a745', color: '#fff', cursor: 'pointer' }}
+                  style={{ padding: '8px 16px', borderRadius: '4px', border: 'none', backgroundColor: 'var(--btn-primary)', color: '#fff', cursor: 'pointer' }}
                 >
                   {guardando ? 'Guardando...' : 'Guardar'}
                 </button>
@@ -431,7 +416,6 @@ function ListaIncidentes({
                 <th style={cellStyle}>Estado</th>
                 <th style={cellStyle}>Descripción</th>
                 <th style={cellStyle}>Fecha</th>
-                <th style={cellStyle}>Evidencia</th>
                 {(puedeActualizar || puedeEliminar) && (
                   <th style={{ ...cellStyle, textAlign: 'center' }}>Acciones</th>
                 )}
@@ -456,7 +440,6 @@ function ListaIncidentes({
                   </td>
                   <td style={cellStyle}>{incidente.descripcion || "-"}</td>
                   <td style={cellStyle}>{incidente.fechaCreacion || "-"}</td>
-                  <td style={cellStyle}>{incidente.evidencia || "-"}</td>
                   {(puedeActualizar || puedeEliminar) && (
                     <td style={{ ...cellStyle, textAlign: 'center', whiteSpace: 'nowrap' }}>
                       {puedeActualizar && (
@@ -501,12 +484,11 @@ function ListaIncidentes({
       {incidenteAEliminar && (
         <div style={modalOverlayStyle} role="presentation">
           <div className="max-h-[90vh] overflow-y-auto" style={deleteModalStyle} role="dialog" aria-modal="true" aria-labelledby="titulo-confirmacion">
-            <h2 id="titulo-confirmacion" style={{ marginTop: 0, color: '#111827' }}>¿Está seguro de eliminar este registro?</h2>
+            <h2 id="titulo-confirmacion" style={{ marginTop: 0, color: 'var(--dlg-title)' }}>¿Está seguro de eliminar este registro?</h2>
             <p style={{ marginBottom: '24px' }}>
               Esta acción eliminará el incidente seleccionado.
             </p>
             <div style={deleteDetailsStyle}>
-              <p><strong>ID:</strong> {incidenteAEliminar.id}</p>
               <p><strong>Título:</strong> {incidenteAEliminar.tituloIncidente || 'Sin título'}</p>
               <p><strong>Prioridad:</strong> {incidenteAEliminar.prioridad || 'Sin prioridad'}</p>
             </div>
@@ -550,13 +532,13 @@ const modalOverlayStyle = {
 };
 
 const modalContentStyle = {
-  backgroundColor: '#fff',
+  backgroundColor: 'var(--dlg-bg)',
   padding: '24px',
   borderRadius: '8px',
   width: '100%',
   maxWidth: '550px',
   boxShadow: '0 4px 10px rgba(0,0,0,0.3)',
-  color: '#333'
+  color: 'var(--dlg-text)'
 };
 
 const deleteModalStyle = {
@@ -565,12 +547,12 @@ const deleteModalStyle = {
 };
 
 const deleteDetailsStyle = {
-  backgroundColor: '#f8fafc',
-  border: '1px solid #e2e8f0',
+  backgroundColor: 'var(--dlg-panel)',
+  border: '1px solid var(--dlg-border)',
   borderRadius: '6px',
   padding: '12px 14px',
   marginBottom: '24px',
-  color: '#1f2937'
+  color: 'var(--dlg-text)'
 };
 
 const formGroupStyle = {
@@ -580,12 +562,12 @@ const formGroupStyle = {
 };
 
 const inputStyle = {
-  backgroundColor: '#ffffff',
-  color: '#212529',
-  colorScheme: 'light',
+  backgroundColor: 'var(--dlg-input-bg)',
+  color: 'var(--dlg-input-text)',
+  colorScheme: 'var(--color-scheme)',
   padding: '8px 10px',
   borderRadius: '4px',
-  border: '1px solid #ced4da',
+  border: '1px solid var(--dlg-input-border)',
   marginTop: '4px',
   outline: 'none'
 };
@@ -599,9 +581,9 @@ const cellStyle = {
 const cancelButtonStyle = {
   padding: '9px 18px',
   borderRadius: '4px',
-  border: '1px solid #ced4da',
-  backgroundColor: '#fff',
-  color: '#333',
+  border: '1px solid var(--dlg-input-border)',
+  backgroundColor: 'var(--dlg-cancel-bg)',
+  color: 'var(--dlg-cancel-text)',
   cursor: 'pointer'
 };
 

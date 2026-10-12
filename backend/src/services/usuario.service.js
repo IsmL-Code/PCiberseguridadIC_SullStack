@@ -1,4 +1,4 @@
-const prisma = require("../config/prisma");
+const prisma = require("../database/prisma");
 const bcrypt = require("bcryptjs");
 
 const camposPublicos = {

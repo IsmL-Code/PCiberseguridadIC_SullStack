@@ -1,7 +1,7 @@
 require("dotenv").config();
 
 const bcrypt = require("bcryptjs");
-const prisma = require("../src/config/prisma");
+const prisma = require("../src/database/prisma");
 
 async function migrarPasswords() {
   const usuarios = await prisma.usuario.findMany({

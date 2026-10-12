@@ -1,7 +1,9 @@
+const { RoleEnum } = require("../models/roles.model");
+
 const PERMISOS_POR_ROL = {
-  administrador: ["leer", "crear", "editar", "eliminar"],
-  analista: ["leer", "crear"],
-  supervisor: ["leer", "editar"]
+  [RoleEnum.ADMINISTRADOR.toLowerCase()]: ["leer", "crear", "editar", "eliminar"],
+  [RoleEnum.ANALISTA.toLowerCase()]: ["leer", "crear"],
+  [RoleEnum.SUPERVISOR.toLowerCase()]: ["leer", "editar"]
 };
 
 function requiereRol(rolesPermitidos) {

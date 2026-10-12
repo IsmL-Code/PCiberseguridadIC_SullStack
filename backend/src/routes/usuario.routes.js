@@ -4,7 +4,7 @@ const { validar } = require("../middlewares/validate.middleware");
 const { verificarToken } = require("../middlewares/auth.middleware");
 const { requiereRol } = require("../middlewares/requiereRol");
 const { validarIdUsuario } = require("../middlewares/usuario.middleware");
-const { usuarioSchema, actualizarUsuarioSchema, estadoUsuarioSchema } = require("../schemas/usuario.schema");
+const { usuarioSchema, actualizarUsuarioSchema, estadoUsuarioSchema } = require("../models/usuario.schema");
 
 router.use(verificarToken);
 router.use(requiereRol("administrador"));

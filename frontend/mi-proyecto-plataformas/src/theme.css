@@ -1,0 +1,491 @@
+/*
+  Temas de la plataforma. Se aplican con <html data-theme="light|dark">.
+  El tema claro es el predeterminado; el oscuro conserva la identidad visual original.
+*/
+
+:root[data-theme="light"] {
+  color-scheme: light;
+  --color-scheme: light;
+  --bg: #f3f5f9;
+  --text: #1f2937;
+  --text-h: #0f172a;
+  --muted: #64748b;
+  --soft: #475569;
+  --strong: #0f172a;
+  --surface: #ffffff;
+  --surface-border: #dbe3ef;
+  --surface-2: #e8eef8;
+  --line: #dbe3ef;
+  --row-hover: #eef3fb;
+  --chrome: #ffffff;
+  --chrome-text: #0f172a;
+  --chrome-sub: #475569;
+  --chrome-line: #dbe3ef;
+  --chrome-shadow: 0 1px 6px rgb(15 23 42 / 10%);
+  --login-header: #ffffff;
+  --nav-text: #1e293b;
+  --nav-active: #dbeafe;
+  --nav-heading: #2563eb;
+  --nav-muted: #64748b;
+  --avatar-bg: #dbeafe;
+  --focus-ring: #2563eb;
+  --btn-primary: #2563eb;
+  --btn-primary-hover: #1d4ed8;
+  --dlg-overlay: rgb(15 23 42 / 55%);
+  --dlg-bg: #ffffff;
+  --dlg-text: #1f2937;
+  --dlg-title: #111827;
+  --dlg-muted: #4b5563;
+  --dlg-subtle: #6b7280;
+  --dlg-border: #d5d5d5;
+  --dlg-panel: #f8fafc;
+  --dlg-input-bg: #ffffff;
+  --dlg-input-text: #111827;
+  --dlg-input-border: #ced4da;
+  --dlg-placeholder: #77869c;
+  --dlg-cancel-bg: #e2e8f0;
+  --dlg-cancel-text: #333333;
+  --dlg-cancel-hover: #cbd5e1;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --color-scheme: dark;
+  --bg: #15161b;
+  --text: #e5eaf2;
+  --text-h: #f3f5f8;
+  --muted: #8295b1;
+  --soft: #aab8cc;
+  --strong: #d4deed;
+  --surface: #1b293c;
+  --surface-border: #29384c;
+  --surface-2: #2c3749;
+  --line: #596170;
+  --row-hover: #1c2029;
+  --chrome: #101b32;
+  --chrome-text: #ffffff;
+  --chrome-sub: #d0def7;
+  --chrome-line: rgb(208 222 247 / 19%);
+  --chrome-shadow: 0 3px 12px rgb(0 0 0 / 20%);
+  --login-header: #030819;
+  --nav-text: #f0f4ff;
+  --nav-active: rgb(164 190 255 / 31%);
+  --nav-heading: #afc9ff;
+  --nav-muted: #9fb6df;
+  --avatar-bg: rgb(255 255 255 / 17%);
+  --focus-ring: #ffffff;
+  --btn-primary: #2d80ff;
+  --btn-primary-hover: #1f66e0;
+  --dlg-overlay: rgb(0 0 0 / 68%);
+  --dlg-bg: #1b293c;
+  --dlg-text: #e5eaf2;
+  --dlg-title: #f3f5f8;
+  --dlg-muted: #aab8cc;
+  --dlg-subtle: #8295b1;
+  --dlg-border: #344154;
+  --dlg-panel: #141f30;
+  --dlg-input-bg: #101b32;
+  --dlg-input-text: #f3f5f8;
+  --dlg-input-border: #3a4a63;
+  --dlg-placeholder: #8192ae;
+  --dlg-cancel-bg: #344154;
+  --dlg-cancel-text: #e5eaf2;
+  --dlg-cancel-hover: #41516a;
+}
+
+:root[data-theme] {
+  background: var(--bg);
+}
+
+/* Estructura general */
+.dashboard-shell {
+  color: var(--text);
+  background: var(--bg);
+}
+
+.dashboard-content {
+  background: var(--bg);
+}
+
+.dashboard-topbar {
+  color: var(--chrome-text);
+  background: var(--chrome);
+  box-shadow: var(--chrome-shadow);
+}
+
+.login-dashboard-header {
+  background: var(--login-header);
+}
+
+.dashboard-brand small,
+.login-dashboard-brand small {
+  color: var(--chrome-sub);
+}
+
+.dashboard-user__name {
+  color: var(--chrome-text);
+}
+
+.dashboard-avatar {
+  background: var(--avatar-bg);
+}
+
+.dashboard-logout:focus-visible,
+.dashboard-nav__item:focus-visible,
+.incident-modal-actions > button:focus-visible,
+.user-action:focus-visible {
+  outline-color: var(--focus-ring);
+}
+
+.dashboard-sidebar {
+  color: var(--nav-text);
+  background: var(--chrome);
+}
+
+:root[data-theme="light"] .dashboard-sidebar {
+  border-right: 1px solid var(--chrome-line);
+}
+
+.dashboard-sidebar__heading {
+  color: var(--nav-heading);
+}
+
+.dashboard-nav__item {
+  color: var(--nav-text);
+}
+
+.dashboard-nav__item:hover:not(:disabled),
+.dashboard-nav__item.is-active {
+  background: var(--nav-active);
+}
+
+.dashboard-nav__item:disabled {
+  color: var(--nav-muted);
+}
+
+.dashboard-nav__item small {
+  color: var(--nav-muted);
+}
+
+.dashboard-sidebar__footer {
+  border-top-color: var(--chrome-line);
+}
+
+.dashboard-sidebar__footer span {
+  color: var(--chrome-sub);
+}
+
+.dashboard-menu-toggle {
+  color: var(--chrome-text);
+  background: var(--chrome);
+}
+
+:root[data-theme="light"] .dashboard-menu-toggle {
+  border-color: var(--chrome-line);
+}
+
+/* Botón de cambio de tema */
+.theme-toggle {
+  display: inline-grid;
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
+  place-items: center;
+  padding: 0;
+  border: 1px solid var(--chrome-line);
+  border-radius: 50%;
+  color: var(--chrome-text);
+  background: transparent;
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+  transition: background-color 150ms ease;
+}
+
+.theme-toggle:hover {
+  background: var(--nav-active);
+}
+
+.theme-toggle:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.login-dashboard-header {
+  justify-content: space-between;
+}
+
+/* Títulos, tarjetas y textos */
+.dashboard-title h1,
+.dashboard-records__heading h2 {
+  color: var(--text-h);
+}
+
+.dashboard-title p,
+.dashboard-records__heading p,
+.dashboard-footer {
+  color: var(--muted);
+}
+
+.dashboard-stat {
+  border-color: var(--surface-border);
+  border-top-color: #2d80ff;
+  color: var(--text-h);
+  background: var(--surface);
+}
+
+.dashboard-stat--blue { border-top-color: #2d80ff; }
+.dashboard-stat--purple { border-top-color: #ff2855; }
+.dashboard-stat--amber { border-top-color: #ffbd00; }
+.dashboard-stat--green { border-top-color: #00c993; }
+
+:root[data-theme="light"] .dashboard-stat__icon {
+  background: var(--surface-2);
+}
+
+:root[data-theme="light"] .dashboard-message--error {
+  color: #b91c1c;
+  background: #fee2e2;
+}
+
+:root[data-theme="light"] .dashboard-message--success {
+  color: #047857;
+}
+
+/* Buscador, filtros y botones principales (azules) */
+.incidentes-search__input,
+.incidentes-filter {
+  border-color: var(--dlg-input-border) !important;
+}
+
+.incidentes-search__icon {
+  color: var(--muted);
+}
+
+.incidentes-search__input::placeholder {
+  color: var(--dlg-placeholder);
+}
+
+/* Tabla de incidentes */
+.tabla-incidentes {
+  color: var(--soft);
+}
+
+.tabla-incidentes thead tr {
+  color: var(--text-h) !important;
+  background: var(--surface-2) !important;
+}
+
+.tabla-incidentes tbody tr {
+  border-bottom-color: var(--line) !important;
+}
+
+.tabla-incidentes tbody tr:hover {
+  background: var(--row-hover);
+}
+
+.tabla-incidentes td {
+  border-bottom-color: var(--line);
+  color: var(--soft);
+}
+
+.tabla-incidentes td strong {
+  color: var(--strong);
+}
+
+.incidentes-empty,
+.user-records__status,
+.user-status-count {
+  color: var(--soft);
+}
+
+:root[data-theme="light"] .incidente-badge {
+  color: #334155;
+  background: #e2e8f0;
+}
+
+:root[data-theme="light"] .incidente-badge--critica,
+:root[data-theme="light"] .incidente-badge--crítica {
+  color: #9a3412;
+  background: #ffedd5;
+}
+
+:root[data-theme="light"] .incidente-badge--alta {
+  color: #b91c1c;
+  background: #fee2e2;
+}
+
+:root[data-theme="light"] .incidente-badge--media,
+:root[data-theme="light"] .incidente-badge--en-proceso {
+  color: #1d4ed8;
+  background: #dbeafe;
+}
+
+:root[data-theme="light"] .incidente-badge--baja,
+:root[data-theme="light"] .incidente-badge--cerrado,
+:root[data-theme="light"] .incidente-badge--resuelto {
+  color: #047857;
+  background: #d1fae5;
+}
+
+:root[data-theme="light"] .user-status-badge {
+  color: #92400e;
+  background: #fef3c7;
+}
+
+:root[data-theme="light"] .user-status-badge--suspended {
+  color: #b91c1c;
+  background: #fee2e2;
+}
+
+:root[data-theme="light"] .user-status-badge--deleted {
+  color: #475569;
+  background: #e2e8f0;
+}
+
+:root[data-theme="light"] .user-status-badge--active {
+  color: #047857;
+  background: #d1fae5;
+}
+
+/* Ventanas, formularios y diálogos */
+.user-form-overlay,
+.user-delete-overlay {
+  background: var(--dlg-overlay);
+}
+
+.user-form,
+.user-delete-dialog,
+.acceso-denegado__card {
+  border-color: var(--dlg-border);
+  color: var(--dlg-text);
+  background: var(--dlg-bg);
+}
+
+.user-form__title,
+.user-delete-dialog h3,
+.user-delete-dialog p strong {
+  color: var(--dlg-title);
+}
+
+.user-form__description {
+  color: var(--dlg-muted);
+}
+
+.user-delete-dialog p,
+.user-form__field {
+  color: var(--dlg-text);
+}
+
+.user-form__field small {
+  color: var(--dlg-subtle);
+}
+
+.user-form__field input,
+.user-form__field select,
+.user-status-dialog .user-form__field select {
+  border-color: var(--dlg-input-border);
+  color: var(--dlg-input-text);
+  background: var(--dlg-input-bg);
+  color-scheme: var(--color-scheme);
+}
+
+.user-form__field input:focus,
+.user-form__field select:focus,
+.user-status-dialog .user-form__field select:focus {
+  border-color: #2d80ff;
+}
+
+.user-form__field input::placeholder {
+  color: var(--dlg-placeholder);
+}
+
+select option {
+  color: var(--dlg-input-text);
+  background-color: var(--dlg-input-bg);
+}
+
+.user-password-toggle {
+  color: var(--dlg-subtle);
+}
+
+.user-password-toggle:hover {
+  color: var(--dlg-title);
+  background: var(--dlg-cancel-bg);
+}
+
+.user-form__actions .user-form__cancel,
+.user-delete-dialog__actions .user-form__cancel,
+.user-status-dialog .user-delete-dialog__actions .user-form__cancel {
+  border-color: var(--dlg-input-border);
+  color: var(--dlg-cancel-text);
+  background: var(--dlg-cancel-bg);
+}
+
+.user-form__actions .user-form__cancel:hover,
+.user-delete-dialog__actions .user-form__cancel:hover,
+.user-status-dialog .user-delete-dialog__actions .user-form__cancel:hover {
+  background: var(--dlg-cancel-hover);
+}
+
+.user-delete-dialog__details {
+  border-color: var(--dlg-border);
+  color: var(--dlg-text);
+  background: var(--dlg-panel);
+}
+
+.acceso-denegado--pantalla {
+  min-height: 100vh;
+  padding: 24px 16px;
+  background: var(--bg);
+}
+
+.acceso-denegado__card h1 {
+  color: var(--btn-primary);
+}
+
+.acceso-denegado__btn {
+  background: var(--btn-primary);
+}
+
+.acceso-denegado__btn:hover {
+  background: var(--btn-primary-hover);
+}
+
+/* Pantalla de login (clases de Tailwind): se reasigna la escala de colores */
+.login-page {
+  --color-emerald-300: #93c5fd;
+  --color-emerald-400: #60a5fa;
+  --color-emerald-500: #3b82f6;
+  --color-emerald-600: #2563eb;
+  --color-emerald-700: #1d4ed8;
+  --color-emerald-950: #172554;
+}
+
+.login-page button[type="submit"],
+.login-page button[type="submit"] svg {
+  color: #fff;
+}
+
+.login-page button:focus-visible {
+  outline-color: #3b82f6 !important;
+}
+
+:root[data-theme="light"] .login-page {
+  --color-slate-950: #f1f5f9;
+  --color-slate-900: #ffffff;
+  --color-slate-800: #e2e8f0;
+  --color-slate-700: #cbd5e1;
+  --color-slate-500: #64748b;
+  --color-slate-400: #475569;
+  --color-slate-300: #334155;
+  --color-slate-100: #0f172a;
+  --color-white: #0f172a;
+  --color-emerald-300: #1d4ed8;
+  --color-emerald-400: #2563eb;
+  --color-emerald-950: #dbeafe;
+  --color-red-950: #fee2e2;
+  --color-red-800: #fca5a5;
+  --color-red-400: #dc2626;
+  --color-red-300: #b91c1c;
+}

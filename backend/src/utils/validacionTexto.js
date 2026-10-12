@@ -1,18 +1,5 @@
-const { z } = require("zod");
-
-const mensajeTextoInvalido = "Debe ser una palabra o frase legible, no una secuencia aleatoria de letras o números.";
+﻿const mensajeTextoInvalido = "Debe ser una palabra o frase legible, no una secuencia aleatoria de letras o números.";
 const mensajeContenidoPeligroso = "No se permiten etiquetas HTML ni patrones de inyección en este campo.";
-const tiposIncidente = [
- "Phishing",
- "Malware",
- "Ransomware",
- "Fuerza bruta",
- "Acceso no autorizado",
- "Fuga de información",
- "Denegación de servicio",
- "Ingeniería social",
- "Otro"
-];
 
 const patronesContenidoPeligroso = [
  /<\s*\/?\s*[a-z][^>]*>/iu,
@@ -55,21 +42,5 @@ function esTextoLegible(valor) {
  });
 }
 
-const incidenteSchema = z.object({
- tituloIncidente: z.string().trim().min(5).max(120)
-  .refine(esContenidoSeguro, mensajeContenidoPeligroso)
-  .refine(esTextoLegible, mensajeTextoInvalido),
- tipo: z.enum(tiposIncidente),
- sistemaAfectado: z.string().trim().max(100)
-  .refine((valor) => !valor || esContenidoSeguro(valor), mensajeContenidoPeligroso)
-  .refine((valor) => !valor || esTextoLegible(valor), mensajeTextoInvalido).optional(),
- descripcion: z.string().trim().min(10).max(2000)
-  .refine(esContenidoSeguro, mensajeContenidoPeligroso)
-  .refine(esTextoLegible, mensajeTextoInvalido),
- prioridad: z.enum(["BAJA", "MEDIA", "ALTA", "CRITICA"]).default("MEDIA"),
- estado: z.enum(["ABIERTO", "EN_PROCESO", "CERRADO"]).default("ABIERTO"),
- evidencia: z.string().trim().max(255)
-  .refine((valor) => !valor || esContenidoSeguro(valor), mensajeContenidoPeligroso)
-  .refine((valor) => !valor || esTextoLegible(valor), mensajeTextoInvalido).optional()
-});
-module.exports = { incidenteSchema };
+module.exports = { mensajeTextoInvalido, mensajeContenidoPeligroso, esContenidoSeguro, esTextoLegible };
+

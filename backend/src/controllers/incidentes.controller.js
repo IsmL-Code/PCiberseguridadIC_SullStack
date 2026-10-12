@@ -24,8 +24,7 @@ function datosIncidente(body) {
     sistemaAfectado: body.sistemaAfectado || null,
     descripcion: body.descripcion,
     prioridad: body.prioridad,
-    estado: body.estado,
-    evidencia: body.evidencia || null
+    estado: body.estado
   };
 }
 

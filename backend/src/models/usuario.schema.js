@@ -1,10 +1,11 @@
 const { z } = require("zod");
+const { RoleEnum } = require("../models/roles.model");
 
 const rolSchema = z.string()
   .trim()
   .transform((rol) => rol.toLowerCase())
-  .pipe(z.enum(["administrador", "analista", "supervisor"]))
-  .transform((rol) => `${rol[0].toUpperCase()}${rol.slice(1)}`);
+  .pipe(z.enum(Object.values(RoleEnum).map((rol) => rol.toLowerCase())))
+  .transform((rol) => RoleEnum[rol.toUpperCase()]);
 
 const usuarioSchema = z.object({
   nombre: z.string().trim().min(1).max(100),

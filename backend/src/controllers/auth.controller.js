@@ -1,6 +1,6 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const prisma = require("../config/prisma");
+const prisma = require("../database/prisma");
 const { obtenerSecretoJwt } = require("../config/jwt");
 
 async function iniciarSesion(req, res, next) {

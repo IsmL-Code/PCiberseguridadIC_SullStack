@@ -50,12 +50,13 @@ model Incidente {
   descripcion String    @db.Text
   prioridad   Prioridad @default(MEDIA)
   estado      Estado    @default(ABIERTO)
-  evidencia   String?   @db.VarChar(255)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
   usuarioId   Int
   usuario     Usuario   @relation(fields: [usuarioId], references: [id])
   @@index([estado])
+  @@index([deletedAt])
   @@index([prioridad])
   @@index([usuarioId])
 }

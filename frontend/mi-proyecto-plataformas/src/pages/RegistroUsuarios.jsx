@@ -321,16 +321,14 @@ export default function RegistroUsuarios() {
                 <option value="Administrador">Administrador</option>
               </select>
             </label>
-            {usuarioEnEdicion && (
-              <label className="user-form__field">
-                <span>Estado</span>
-                <select name="status" value={formulario.status} onChange={handleChange} required>
-                  <option value="PENDING">Pendiente</option>
-                  <option value="ACTIVE">Activo</option>
-                  <option value="SUSPENDED">Suspendido</option>
-                </select>
-              </label>
-            )}
+            <label className="user-form__field">
+              <span>Estado</span>
+              <select name="status" value={formulario.status} onChange={handleChange} required>
+                <option value="PENDING">Pendiente</option>
+                <option value="ACTIVE">Activo</option>
+                {usuarioEnEdicion && <option value="SUSPENDED">Suspendido</option>}
+              </select>
+            </label>
             <div className="user-form__actions">
               <button type="button" className="user-form__cancel" onClick={cerrarFormulario} disabled={guardando}>
                 Cancelar
@@ -442,7 +440,6 @@ export default function RegistroUsuarios() {
             <h3 id="titulo-eliminar-usuario">¿Está seguro de marcar fuera de servicio este usuario?</h3>
             <p id="detalle-eliminar-usuario">El usuario dejará de estar activo y su registro se conservará para consulta.</p>
             <div className="user-delete-dialog__details">
-              <p><strong>ID:</strong> {usuarioAEliminar.id}</p>
               <p><strong>Nombre:</strong> {`${usuarioAEliminar.nombre || ""} ${usuarioAEliminar.apellido || ""}`.trim() || "—"}</p>
               <p><strong>Correo:</strong> {usuarioAEliminar.email || "—"}</p>
             </div>

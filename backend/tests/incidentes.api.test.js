@@ -8,7 +8,7 @@ process.env.DATABASE_URL ||= "mysql://test:test@127.0.0.1:3306/test_db";
 
 const app = require("../src/app");
 const incidenteService = require("../src/services/incidente.service");
-const prisma = require("../src/config/prisma");
+const prisma = require("../src/database/prisma");
 
 const datosValidos = {
   tituloIncidente: "Acceso sospechoso a cuenta",
@@ -16,8 +16,7 @@ const datosValidos = {
   sistemaAfectado: "Portal corporativo",
   descripcion: "Se identificó un inicio de sesión sospechoso desde una ubicación inusual.",
   prioridad: "ALTA",
-  estado: "ABIERTO",
-  evidencia: "captura-login.png"
+  estado: "ABIERTO"
 };
 
 let registros;

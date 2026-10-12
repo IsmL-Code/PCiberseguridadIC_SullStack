@@ -1,19 +1,19 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { iniciarSesion } from '../services/authApi';
+import { destinoSeguro } from '../utils/sesion';
+import ToggleTema from '../components/ToggleTema';
 import protegerImage from '../../img/proteger.png';
 
 export default function App() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [showRecovery, setShowRecovery] = useState(false);
-  const [recoveryEmail, setRecoveryEmail] = useState('');
-  const [recoverySent, setRecoverySent] = useState(false);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -25,23 +25,11 @@ export default function App() {
       localStorage.setItem('isAuthenticated', 'true');
       localStorage.setItem('authToken', respuesta.token);
       localStorage.setItem('usuario', JSON.stringify(respuesta.usuario));
-      navigate('/dashboard');
+      navigate(destinoSeguro(location.state?.from), { replace: true });
     } catch (error) {
       setErrorMessage(error.message);
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const handleRecoverySubmit = (e) => {
-    e.preventDefault();
-    if (recoveryEmail.trim()) {
-      setRecoverySent(true);
-      setTimeout(() => {
-        setRecoverySent(false);
-        setShowRecovery(false);
-        setRecoveryEmail('');
-      }, 3000);
     }
   };
 
@@ -61,6 +49,7 @@ export default function App() {
             <small>Plataforma centralizada para registro y seguimiento de amenazas</small>
           </span>
         </div>
+        <ToggleTema />
       </header>
 
       {/* Main Content Area */}
@@ -143,13 +132,6 @@ export default function App() {
                   <label className="block text-xs sm:text-sm font-medium text-slate-300">
                     Contraseña
                   </label>
-                  <button
-                    type="button"
-                    onClick={() => setShowRecovery(true)}
-                    className="text-xs text-emerald-400 hover:text-emerald-300 transition-colors font-medium focus:outline-none"
-                  >
-                    ¿Olvidó su contraseña?
-                  </button>
                 </div>
                 <div className="relative">
                   <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
@@ -212,68 +194,6 @@ export default function App() {
           </div>
         )}
       </main>
-
-      {/* Forgot Password Modal / Drawer */}
-      {showRecovery && (
-        <div className="login-recovery-overlay fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn">
-          <div className="login-recovery-card bg-slate-900 border border-slate-800 max-w-md w-full p-6 sm:p-8 rounded-2xl shadow-2xl relative">
-            <button
-              onClick={() => { setShowRecovery(false); setRecoverySent(false); }}
-              className="absolute top-4 right-4 text-slate-400 hover:text-white transition-colors"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-
-            <div className="text-center mb-6">
-              <div className="w-12 h-12 bg-emerald-500/10 text-emerald-400 rounded-full flex items-center justify-center mx-auto mb-3 text-xl border border-emerald-500/20">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
-                </svg>
-              </div>
-              <h3 className="text-lg font-bold text-white">Recuperación de Credenciales</h3>
-              <p className="text-xs text-slate-400 mt-1">Ingrese su correo registrado para recibir un enlace de restablecimiento seguro o notificar al Administrador de Red.</p>
-            </div>
-
-            {recoverySent ? (
-              <div className="bg-emerald-950/40 border border-emerald-800/60 text-emerald-300 p-4 rounded-xl text-center text-xs space-y-2">
-                <p className="font-semibold text-emerald-200">¡Instrucciones enviadas con éxito!</p>
-                <p>Revise su bandeja de entrada corporativa o contacte al SOC central.</p>
-              </div>
-            ) : (
-              <form onSubmit={handleRecoverySubmit} className="space-y-4">
-                <div>
-                  <label className="block text-xs font-medium text-slate-300 mb-1">Correo Electrónico Corporativo</label>
-                  <input
-                    type="email"
-                    required
-                    value={recoveryEmail}
-                    onChange={(e) => setRecoveryEmail(e.target.value)}
-                    placeholder="analista@empresa.com"
-                    className="login-input w-full px-4 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-slate-100 placeholder-slate-500 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                  />
-                </div>
-                <div className="flex space-x-3 pt-2">
-                  <button
-                    type="button"
-                    onClick={() => setShowRecovery(false)}
-                    className="flex-1 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-xl transition-all"
-                  >
-                    Cancelar
-                  </button>
-                  <button
-                    type="submit"
-                    className="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-slate-950 text-xs font-semibold rounded-xl transition-all shadow-lg shadow-emerald-600/20"
-                  >
-                    Enviar Enlace
-                  </button>
-                </div>
-              </form>
-            )}
-          </div>
-        </div>
-      )}
 
       {/* Footer */}
       <footer className="login-footer w-full py-5 text-center text-[11px] text-slate-500 border-t border-slate-900/80 z-10">
