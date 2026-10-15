@@ -1,11 +1,15 @@
 const express = require("express");
+const helmet = require("helmet");
 const cors = require("cors");
 const rutas = require("./routes/incidente.routes");
 const rutasUsuarios = require("./routes/usuario.routes");
 const rutasAuth = require("./routes/auth.routes");
 const { noEncontrado, manejarError } = require("./middlewares/error.middleware");
+const { verificarOrigen } = require("./middlewares/csrf.middleware");
+const { limitarPeticiones } = require("./middlewares/limitarPeticiones.middleware");
 
 const app = express();
+app.use(helmet());
 const origenFrontend = process.env.FRONTEND_URL
   ? new URL(process.env.FRONTEND_URL).origin
   : null;
@@ -19,11 +23,14 @@ app.use(
       callback(null, !origin || origenPermitido.includes(origin));
     },
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
+    allowedHeaders: ["Content-Type", "Authorization", "X-CSRF-Token"],
+    credentials: true,
   })
 );
 
-app.use(express.json());
+app.use(verificarOrigen(origenPermitido));
+app.use(express.json({ limit: "10kb" }));
+app.use("/api", limitarPeticiones);
 app.use("/api/incidentes", rutas);
 app.use("/api/usuarios", rutasUsuarios);
 app.use("/api/auth", rutasAuth);

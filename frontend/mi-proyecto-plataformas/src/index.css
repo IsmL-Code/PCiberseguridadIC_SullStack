@@ -1381,6 +1381,24 @@ code {
   .dashboard-stats {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+
+  .incidentes-toolbar {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .incidentes-search,
+  .incidentes-filter,
+  .incidentes-toolbar .btn-crear {
+    width: 100%;
+    min-width: 0;
+    margin: 0;
+  }
+
+  .incidentes-toolbar .btn-crear {
+    height: 48px;
+  }
 }
 
 @media (max-width: 680px) {
@@ -1601,12 +1619,11 @@ code {
   }
 
   .incidentes-search {
-    min-width: 100%;
+    grid-column: 1 / -1;
   }
 
-  .incidentes-filter {
-    min-width: calc(50% - 5px);
-    flex: 1 1 calc(50% - 5px);
+  .incidentes-toolbar .btn-crear {
+    grid-column: 1 / -1;
   }
 
   .btn-crear {
@@ -1698,3 +1715,8 @@ code {
     padding-bottom: 16px;
   }
 }
+
+.paginacion { display: flex; align-items: center; justify-content: center; gap: 1rem; padding: 0.75rem 0; }
+.paginacion__boton { padding: 0.4rem 0.9rem; border-radius: 6px; border: 1px solid #cbd5e1; background: #fff; cursor: pointer; }
+.paginacion__boton:disabled { opacity: 0.5; cursor: not-allowed; }
+.paginacion__estado { font-size: 0.9rem; }

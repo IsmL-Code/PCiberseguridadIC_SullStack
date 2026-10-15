@@ -8,58 +8,32 @@ export const ROLES = Object.freeze({
 export const ACCESO_RUTAS = Object.freeze({
   incidentes: Object.values(ROLES),
   usuarios: [ROLES.ADMINISTRADOR],
-  "usuarios-fuera-servicio": [ROLES.ADMINISTRADOR]
+  "usuarios-fuera-servicio": [ROLES.ADMINISTRADOR],
+  "incidentes-eliminados": [ROLES.ADMINISTRADOR]
 });
 
-const CLAVES_SESION = ["isAuthenticated", "authToken", "usuario"];
+const CLAVES_SESION = ["isAuthenticated", "usuario", "csrfToken", "sessionExpiresAt", "authToken"];
 
 export function normalizarRol(rol) {
   return typeof rol === "string" ? rol.trim().toLocaleLowerCase("es") : "";
-}
-
-export function decodificarJwt(token) {
-  if (typeof token !== "string") return null;
-  const partes = token.split(".");
-  if (partes.length !== 3) return null;
-
-  try {
-    const base64 = partes[1].replace(/-/g, "+").replace(/_/g, "/");
-    const relleno = base64.padEnd(Math.ceil(base64.length / 4) * 4, "=");
-    const json = new TextDecoder().decode(
-      Uint8Array.from(atob(relleno), (c) => c.charCodeAt(0))
-    );
-    const payload = JSON.parse(json);
-    return payload && typeof payload === "object" ? payload : null;
-  } catch {
-    return null;
-  }
-}
-
-export function obtenerExpiracionMs(token) {
-  const payload = decodificarJwt(token);
-  return typeof payload?.exp === "number" ? payload.exp * 1000 : null;
 }
 
 const SESION_INVALIDA = Object.freeze({
   autenticado: false,
   rol: "",
   usuario: null,
-  token: null
+  csrfToken: null,
+  expiraEn: null
 });
 
-// El rol sale del JWT, no del objeto "usuario" guardado, que el usuario puede editar
+// El token JWT va en una cookie HttpOnly que el JavaScript no puede leer. El rol guardado
+// solo decide qué se muestra en la interfaz: el backend valida siempre los permisos reales.
 export function obtenerSesion(storage = localStorage, ahora = Date.now()) {
-  const token = storage.getItem("authToken");
-  if (storage.getItem("isAuthenticated") !== "true" || !token) return SESION_INVALIDA;
+  const csrfToken = storage.getItem("csrfToken");
+  if (storage.getItem("isAuthenticated") !== "true" || !csrfToken) return SESION_INVALIDA;
 
-  const payload = decodificarJwt(token);
-  if (!payload) return SESION_INVALIDA;
-
-  const expiracion = obtenerExpiracionMs(token);
-  if (expiracion !== null && expiracion <= ahora) return SESION_INVALIDA;
-
-  const rol = normalizarRol(payload.rol);
-  if (!Object.values(ROLES).includes(rol)) return SESION_INVALIDA;
+  const expiraEn = Number(storage.getItem("sessionExpiresAt"));
+  if (!Number.isFinite(expiraEn) || expiraEn <= ahora) return SESION_INVALIDA;
 
   let usuario;
   try {
@@ -68,7 +42,17 @@ export function obtenerSesion(storage = localStorage, ahora = Date.now()) {
     usuario = null;
   }
 
-  return { autenticado: true, rol, usuario, token };
+  const rol = normalizarRol(usuario?.rol);
+  if (!Object.values(ROLES).includes(rol)) return SESION_INVALIDA;
+
+  return { autenticado: true, rol, usuario, csrfToken, expiraEn };
+}
+
+export function guardarSesion({ usuario, csrfToken, expiraEn }, storage = localStorage) {
+  storage.setItem("isAuthenticated", "true");
+  storage.setItem("usuario", JSON.stringify(usuario));
+  storage.setItem("csrfToken", csrfToken);
+  storage.setItem("sessionExpiresAt", String(expiraEn));
 }
 
 export function limpiarSesion(storage = localStorage) {

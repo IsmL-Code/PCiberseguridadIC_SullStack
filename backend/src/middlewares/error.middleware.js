@@ -2,6 +2,8 @@ function noEncontrado(req, res) {
  res.status(404).json({ error: "Ruta no encontrada" });
 }
 
+// Express exige 4 parámetros para identificar un manejador de errores
+// eslint-disable-next-line no-unused-vars
 function manejarError(error, req, res, next) {
  console.error(error);
 

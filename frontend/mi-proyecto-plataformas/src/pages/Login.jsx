@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { iniciarSesion } from '../services/authApi';
-import { destinoSeguro } from '../utils/sesion';
+import { destinoSeguro, guardarSesion } from '../utils/sesion';
 import ToggleTema from '../components/ToggleTema';
 import protegerImage from '../../img/proteger.png';
 
@@ -22,9 +22,7 @@ export default function App() {
 
     try {
       const respuesta = await iniciarSesion(email, password);
-      localStorage.setItem('isAuthenticated', 'true');
-      localStorage.setItem('authToken', respuesta.token);
-      localStorage.setItem('usuario', JSON.stringify(respuesta.usuario));
+      guardarSesion(respuesta);
       navigate(destinoSeguro(location.state?.from), { replace: true });
     } catch (error) {
       setErrorMessage(error.message);

@@ -1,7 +1,7 @@
 ﻿import { useState, useEffect } from "react";
-import { obtenerSesion, obtenerExpiracionMs, limpiarSesion } from "../utils/sesion";
+import { obtenerSesion, limpiarSesion } from "../utils/sesion";
 
-// Mantiene la sesión sincronizada: expiración del token, otras pestañas y 401 del backend
+// Mantiene la sesión sincronizada: expiración de la sesión, otras pestañas y 401 del backend
 export function useSesionActiva() {
   const [sesion, setSesion] = useState(() => obtenerSesion());
 
@@ -12,9 +12,8 @@ export function useSesionActiva() {
       setSesion(actual);
     };
 
-    const expiracion = obtenerExpiracionMs(sesion.token);
-    const temporizador = expiracion
-      ? setTimeout(actualizar, Math.min(Math.max(expiracion - Date.now(), 0), 2 ** 31 - 1))
+    const temporizador = sesion.expiraEn
+      ? setTimeout(actualizar, Math.min(Math.max(sesion.expiraEn - Date.now(), 0), 2 ** 31 - 1))
       : null;
 
     window.addEventListener("auth:session-expired", actualizar);
@@ -24,7 +23,7 @@ export function useSesionActiva() {
       window.removeEventListener("auth:session-expired", actualizar);
       window.removeEventListener("storage", actualizar);
     };
-  }, [sesion.token]);
+  }, [sesion.expiraEn]);
 
   return sesion;
 }

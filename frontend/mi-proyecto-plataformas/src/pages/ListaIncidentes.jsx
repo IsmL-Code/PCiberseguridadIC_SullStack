@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react';
+import Paginacion from '../components/Paginacion';
+import { paginar } from '../utils/paginacion';
 
 const tiposIncidente = [
   'Phishing',
@@ -214,6 +216,11 @@ function ListaIncidentes({
     return coincideTexto && coincidePrioridad;
   });
 
+  const claveFiltros = `${terminoBusqueda}|${filtroPrioridad}|${filtroEstado}`;
+  const [estadoPagina, setEstadoPagina] = useState({ clave: '', pagina: 1 });
+  const paginaSolicitada = estadoPagina.clave === claveFiltros ? estadoPagina.pagina : 1;
+  const { pagina, totalPaginas, items: incidentesPagina } = paginar(incidentesFiltrados, paginaSolicitada);
+
   return (
     <div className="contenedor-incidentes w-full">
       {toastValidacion && (
@@ -388,10 +395,7 @@ function ListaIncidentes({
                 >
                   Cancelar
                 </button>
-                <button 
-                  type="submit" 
-                  style={{ padding: '8px 16px', borderRadius: '4px', border: 'none', backgroundColor: 'var(--btn-primary)', color: '#fff', cursor: 'pointer' }}
-                >
+                <button type="submit" disabled={guardando} style={{ padding: '8px 16px', borderRadius: '4px', border: 'none', backgroundColor: '#28a745', color: '#fff', cursor: 'pointer' }}>
                   {guardando ? 'Guardando...' : 'Guardar'}
                 </button>
               </div>
@@ -422,7 +426,7 @@ function ListaIncidentes({
               </tr>
             </thead>
             <tbody>
-              {incidentesFiltrados.map((incidente) => (
+              {incidentesPagina.map((incidente) => (
                 <tr key={incidente.id} style={{ borderBottom: '1px solid #e2e8f0' }}>
                   <td style={cellStyle}>{incidente.id}</td>
                   <td style={cellStyle}><strong>{incidente.tituloIncidente || "-"}</strong></td>
@@ -478,6 +482,11 @@ function ListaIncidentes({
               ))}
             </tbody>
           </table>
+          <Paginacion
+            pagina={pagina}
+            totalPaginas={totalPaginas}
+            onCambiar={(nueva) => setEstadoPagina({ clave: claveFiltros, pagina: nueva })}
+          />
         </div>
       )}
 

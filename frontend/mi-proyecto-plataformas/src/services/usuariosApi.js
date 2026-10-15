@@ -3,8 +3,8 @@ import { fetchConSesion } from "./fetchConSesion";
 const API_URL = `${import.meta.env.VITE_API_URL || "http://localhost:3000"}/api/usuarios`;
 
 function encabezadosAutenticacion() {
-  const token = localStorage.getItem("authToken");
-  return token ? { Authorization: `Bearer ${token}` } : {};
+  const csrfToken = localStorage.getItem("csrfToken");
+  return csrfToken ? { "X-CSRF-Token": csrfToken } : {};
 }
 
 async function procesarRespuesta(respuesta, mensajeError) {

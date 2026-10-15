@@ -3,8 +3,8 @@ import { fetchConSesion } from "./fetchConSesion";
 const API_URL = `${import.meta.env.VITE_API_URL || "http://localhost:3000"}/api/incidentes`;
 
 function encabezadosAutenticacion() {
-  const token = localStorage.getItem("authToken");
-  return token ? { Authorization: `Bearer ${token}` } : {};
+  const csrfToken = localStorage.getItem("csrfToken");
+  return csrfToken ? { "X-CSRF-Token": csrfToken } : {};
 }
 
 async function procesarRespuesta(respuesta, mensajeError) {
@@ -32,6 +32,11 @@ export async function obtenerIncidentes(filtros = {}) { //[cite: 5]
   const query = parametros.toString();
   const respuesta = await fetchConSesion(`${API_URL}${query ? `?${query}` : ""}`, { headers: encabezadosAutenticacion() }); //[cite: 5]
   return procesarRespuesta(respuesta, "No se pudo obtener la lista de incidentes");
+}
+
+export async function obtenerIncidentesEliminados() {
+  const respuesta = await fetchConSesion(`${API_URL}/eliminados`, { headers: encabezadosAutenticacion() });
+  return procesarRespuesta(respuesta, "No se pudo obtener la lista de incidentes eliminados");
 }
 
 export async function obtenerIncidentePorId(id) {

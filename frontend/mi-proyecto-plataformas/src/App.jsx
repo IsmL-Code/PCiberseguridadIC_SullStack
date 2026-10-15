@@ -3,6 +3,7 @@ import { obtenerSesion } from "./utils/sesion";
 import IncidentesPage from "./pages/IncidentesPage";
 import RegistroUsuarios from "./pages/RegistroUsuarios";
 import UsuariosFueraServicio from "./pages/UsuariosFueraServicio";
+import IncidentesEliminados from "./pages/IncidentesEliminados";
 import AccesoDenegado from "./pages/AccesoDenegado";
 import NoEncontrado from "./pages/NoEncontrado";
 import Login from "./pages/Login";
@@ -48,6 +49,10 @@ export default function App() {
           <Route
             path="usuarios-fuera-servicio"
             element={<RutaPorRol ruta="usuarios-fuera-servicio"><UsuariosFueraServicio /></RutaPorRol>}
+          />
+          <Route
+            path="incidentes-eliminados"
+            element={<RutaPorRol ruta="incidentes-eliminados"><IncidentesEliminados /></RutaPorRol>}
           />
           <Route path="*" element={<Navigate to="/no-encontrado" replace />} />
         </Route>

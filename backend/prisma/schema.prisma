@@ -17,7 +17,6 @@ model Usuario {
   deletedAt  DateTime?
   createdAt  DateTime    @default(now())
   updatedAt  DateTime    @updatedAt
-    @@index([email])
     incidentes Incidente[]
 }
 
@@ -59,4 +58,6 @@ model Incidente {
   @@index([deletedAt])
   @@index([prioridad])
   @@index([usuarioId])
+  @@index([usuarioId, deletedAt, createdAt])
+  @@index([deletedAt, createdAt])
 }

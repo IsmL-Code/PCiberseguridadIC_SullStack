@@ -3,6 +3,7 @@ const API_URL = `${import.meta.env.VITE_API_URL || "http://localhost:3000"}/api/
 export async function iniciarSesion(email, password) {
   const respuesta = await fetch(`${API_URL}/login`, {
     method: "POST",
+    credentials: "include",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, password })
   });
@@ -13,4 +14,12 @@ export async function iniciarSesion(email, password) {
   }
 
   return cuerpo;
+}
+
+export async function cerrarSesionEnServidor() {
+  try {
+    await fetch(`${API_URL}/logout`, { method: "POST", credentials: "include" });
+  } catch {
+    // Si el servidor no responde, igualmente se limpia la sesión local.
+  }
 }

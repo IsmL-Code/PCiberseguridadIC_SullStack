@@ -37,11 +37,20 @@ async function solicitar(ruta, opciones = {}, rol = "Administrador") {
   return fetch(`${url}${ruta}`, { ...opciones, headers });
 }
 
+let estadoUsuario = "ACTIVE";
+const findUniqueOriginal = prisma.usuario.findUnique;
+
 before(async () => {
+  prisma.usuario.findUnique = async () => ({ status: estadoUsuario });
   metodosOriginales = { ...incidenteService };
-  incidenteService.listar = async ({ estado, prioridad }) => registros.filter((registro) =>
-    (!estado || registro.estado === estado) && (!prioridad || registro.prioridad === prioridad)
-  );
+  incidenteService.listar = async ({ estado, prioridad }, paginacion) => {
+    const filtrados = registros.filter((registro) =>
+      (!estado || registro.estado === estado) && (!prioridad || registro.prioridad === prioridad)
+    );
+    return paginacion
+      ? { datos: filtrados.slice(paginacion.skip, paginacion.skip + paginacion.take), total: filtrados.length }
+      : filtrados;
+  };
   incidenteService.crear = async (datos) => {
     const registro = { ...datos, id: siguienteId++, createdAt: new Date(), usuarioId: 7 };
     registros.push(registro);
@@ -59,6 +68,7 @@ before(async () => {
     if (indice < 0) throw Object.assign(new Error("No encontrado"), { code: "P2025" });
     registros.splice(indice, 1);
   };
+  incidenteService.listarEliminados = async () => registros.filter((registro) => registro.deletedAt);
 
   servidor = app.listen(0);
   await new Promise((resolve) => servidor.once("listening", resolve));
@@ -66,6 +76,7 @@ before(async () => {
 });
 
 beforeEach(() => {
+  estadoUsuario = "ACTIVE";
   registros = [];
   siguienteId = 1;
 });
@@ -73,6 +84,7 @@ beforeEach(() => {
 after(async () => {
   await new Promise((resolve, reject) => servidor.close((error) => error ? reject(error) : resolve()));
   Object.assign(incidenteService, metodosOriginales);
+  prisma.usuario.findUnique = findUniqueOriginal;
   await prisma.$disconnect();
 });
 
@@ -172,4 +184,112 @@ test("9. normaliza el tipo heredado Doss para permitir editar el incidente", asy
   assert.equal(actualizadoRespuesta.status, 200);
   assert.equal((await actualizadoRespuesta.json()).tipo, "Denegación de servicio");
   assert.equal(registros[0].tipo, "Denegación de servicio");
+});
+
+test("10. lista incidentes eliminados solo para el administrador", async () => {
+  registros.push({
+    ...datosValidos,
+    id: 1,
+    createdAt: new Date(),
+    deletedAt: new Date(),
+    usuarioId: 7
+  });
+
+  const denegada = await solicitar("/eliminados", {}, "Supervisor");
+  assert.equal(denegada.status, 403);
+
+  const respuesta = await solicitar("/eliminados");
+  assert.equal(respuesta.status, 200);
+  const lista = await respuesta.json();
+  assert.equal(lista.length, 1);
+  assert.match(lista[0].fechaEliminacion, /^\d{4}-\d{2}-\d{2}$/);
+});
+
+function crearCookieSesion(csrf = "csrf-de-prueba") {
+  const token = jwt.sign({ sub: 7, rol: "Administrador", csrf }, process.env.JWT_SECRET, { expiresIn: "5m" });
+  return `authToken=${token}`;
+}
+
+test("11. con cookie de sesión rechaza escrituras sin token CSRF", async () => {
+  const respuesta = await solicitar("/", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Cookie: crearCookieSesion() },
+    body: JSON.stringify(datosValidos)
+  }, null);
+  assert.equal(respuesta.status, 403);
+  assert.equal(registros.length, 0);
+});
+
+test("12. con cookie de sesión rechaza un token CSRF incorrecto", async () => {
+  const respuesta = await solicitar("/1", {
+    method: "DELETE",
+    headers: { Cookie: crearCookieSesion(), "X-CSRF-Token": "otro-valor" }
+  }, null);
+  assert.equal(respuesta.status, 403);
+});
+
+test("13. con cookie de sesión y token CSRF correcto permite escribir; las lecturas no lo exigen", async () => {
+  const lectura = await solicitar("/", { headers: { Cookie: crearCookieSesion() } }, null);
+  assert.equal(lectura.status, 200);
+
+  const escritura = await solicitar("/", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Cookie: crearCookieSesion(),
+      "X-CSRF-Token": "csrf-de-prueba"
+    },
+    body: JSON.stringify(datosValidos)
+  }, null);
+  assert.equal(escritura.status, 201);
+});
+
+test("14. bloquea escrituras desde un origen no permitido aunque haya sesión", async () => {
+  const respuesta = await solicitar("/", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Cookie: crearCookieSesion(),
+      "X-CSRF-Token": "csrf-de-prueba",
+      Origin: "https://sitio-malicioso.example"
+    },
+    body: JSON.stringify(datosValidos)
+  }, null);
+  assert.equal(respuesta.status, 403);
+  assert.equal(registros.length, 0);
+});
+
+
+test("15. un usuario suspendido pierde el acceso aunque su token siga vigente", async () => {
+  estadoUsuario = "SUSPENDED";
+  const respuesta = await solicitar("/");
+  assert.equal(respuesta.status, 401);
+});
+
+
+test("16. un token revocado al cerrar sesion deja de ser valido", async () => {
+  const { revocarToken } = require("../src/utils/tokensRevocados");
+  const token = jwt.sign({ sub: 7, rol: "Administrador" }, process.env.JWT_SECRET, { expiresIn: "5m", jwtid: "jti-de-prueba" });
+  const antes = await solicitar("/", { headers: { Cookie: `authToken=${token}` } }, null);
+  assert.equal(antes.status, 200);
+
+  revocarToken("jti-de-prueba", Math.floor(Date.now() / 1000) + 300);
+  const despues = await solicitar("/", { headers: { Cookie: `authToken=${token}` } }, null);
+  assert.equal(despues.status, 401);
+});
+
+test("17. la paginacion del servidor limita filas y devuelve el total", async () => {
+  for (let i = 0; i < 3; i++) {
+    await solicitar("/", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(datosValidos) });
+  }
+  const respuesta = await solicitar("/?pagina=2&limite=2");
+  assert.equal(respuesta.status, 200);
+  const cuerpo = await respuesta.json();
+  assert.equal(cuerpo.datos.length, cuerpo.total - 2);
+  assert.equal(cuerpo.pagina, 2);
+  assert.equal(cuerpo.limite, 2);
+  assert.equal(cuerpo.totalPaginas, Math.ceil(cuerpo.total / 2));
+
+  const limitado = await (await solicitar("/?pagina=1&limite=9999")).json();
+  assert.equal(limitado.limite, 100);
 });

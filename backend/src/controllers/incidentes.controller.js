@@ -1,4 +1,6 @@
 const incidenteService = require("../services/incidente.service");
+const { registrarAuditoria } = require("../utils/auditoria");
+const { leerPaginacion, respuestaPaginada } = require("../utils/paginacion");
 
 const tiposIncidenteLegacy = {
   doss: "Denegación de servicio"
@@ -46,13 +48,29 @@ async function listar(req, res, next) {
   }
 
   try {
-    const incidentes = await incidenteService.listar({
+    const paginacion = leerPaginacion(req.query);
+    const resultado = await incidenteService.listar({
       usuarioId: Number(req.usuario.sub),
       rol: req.usuario.rol,
       estado,
       prioridad
-    });
-    res.json(incidentes.map(seleccionarIncidente));
+    }, paginacion);
+    const datos = (paginacion ? resultado.datos : resultado).map(seleccionarIncidente);
+    res.json(paginacion ? respuestaPaginada(datos, resultado.total, paginacion) : datos);
+  } catch (error) {
+    next(error);
+  }
+}
+
+async function listarEliminados(req, res, next) {
+  try {
+    const paginacion = leerPaginacion(req.query);
+    const resultado = await incidenteService.listarEliminados(paginacion);
+    const datos = (paginacion ? resultado.datos : resultado).map((incidente) => ({
+      ...seleccionarIncidente(incidente),
+      fechaEliminacion: incidente.deletedAt.toISOString().slice(0, 10)
+    }));
+    res.json(paginacion ? respuestaPaginada(datos, resultado.total, paginacion) : datos);
   } catch (error) {
     next(error);
   }
@@ -118,10 +136,11 @@ async function eliminar(req, res, next) {
 
   try {
     await incidenteService.eliminar(id, Number(req.usuario.sub), req.usuario.rol);
+    registrarAuditoria("incidente_eliminado", { incidenteId: id, usuarioId: Number(req.usuario.sub) });
     res.status(204).send();
   } catch (error) {
     next(error);
   }
 }
 
-module.exports = { listar, obtener, crear, actualizar, eliminar };
+module.exports = { listar, listarEliminados, obtener, crear, actualizar, eliminar };

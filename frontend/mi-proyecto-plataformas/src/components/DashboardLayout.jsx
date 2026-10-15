@@ -1,6 +1,7 @@
 ﻿import { useState } from "react";
 import { NavLink, Link, Outlet, useNavigate } from "react-router-dom";
 import { obtenerUsuarioActual, limpiarSesion, tieneAccesoARuta } from "../utils/sesion";
+import { cerrarSesionEnServidor } from "../services/authApi";
 import ToggleTema from "./ToggleTema";
 import DashboardIcon from "./DashboardIcon";
 import protegerImage from "../../img/proteger.png";
@@ -17,7 +18,8 @@ export default function DashboardLayout() {
   const claseItem = ({ isActive }) => `dashboard-nav__item${isActive ? " is-active" : ""}`;
   const cerrarMenu = () => setMenuMovilAbierto(false);
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await cerrarSesionEnServidor();
     limpiarSesion();
     navigate("/login", { replace: true });
   };
@@ -80,11 +82,10 @@ export default function DashboardLayout() {
                     <DashboardIcon name="pin" />
                     <span>Usuarios fuera de servicio</span>
                   </NavLink>
-                  <button type="button" className="dashboard-nav__item" disabled title="Esta opción aún no está disponible">
+                  <NavLink to="/dashboard/incidentes-eliminados" className={claseItem} onClick={cerrarMenu}>
                     <DashboardIcon name="mail" />
-                    <span>Buzón de comunicación</span>
-                    <small>Próximamente</small>
-                  </button>
+                    <span>Incidentes eliminados</span>
+                  </NavLink>
                 </>
               )}
             </nav>

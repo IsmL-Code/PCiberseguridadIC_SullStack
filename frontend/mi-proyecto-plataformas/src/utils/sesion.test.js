@@ -1,30 +1,29 @@
 import test from "node:test";
-import { Buffer } from "node:buffer";
 import assert from "node:assert/strict";
 import {
   obtenerSesion,
+  guardarSesion,
   tieneAccesoARuta,
   destinoSeguro,
   limpiarSesion
 } from "./sesion.js";
 
-const base64url = (obj) => Buffer.from(JSON.stringify(obj)).toString("base64url");
-const crearToken = (payload) => `${base64url({ alg: "HS256" })}.${base64url(payload)}.firma`;
-
 function crearStorage(datos = {}) {
   const mapa = new Map(Object.entries(datos));
   return {
     getItem: (k) => (mapa.has(k) ? mapa.get(k) : null),
+    setItem: (k, v) => mapa.set(k, String(v)),
     removeItem: (k) => mapa.delete(k),
     has: (k) => mapa.has(k)
   };
 }
 
 const AHORA = 1_800_000_000_000;
-const sesionCon = (payload, extra = {}) => crearStorage({
+const sesionCon = ({ rol = "Administrador", expiraEn = AHORA + 60_000 } = {}, extra = {}) => crearStorage({
   isAuthenticated: "true",
-  authToken: crearToken(payload),
-  usuario: JSON.stringify({ nombre: "Ana", rol: "Administrador" }),
+  csrfToken: "csrf",
+  sessionExpiresAt: String(expiraEn),
+  usuario: JSON.stringify({ nombre: "Ana", rol }),
   ...extra
 });
 
@@ -32,25 +31,28 @@ test("sin sesión no está autenticado", () => {
   assert.equal(obtenerSesion(crearStorage(), AHORA).autenticado, false);
 });
 
-test("token válido autentica y toma el rol del token", () => {
-  const sesion = obtenerSesion(sesionCon({ rol: "Analista", exp: AHORA / 1000 + 60 }), AHORA);
+test("sesión vigente autentica y toma el rol del usuario", () => {
+  const sesion = obtenerSesion(sesionCon({ rol: "Analista" }), AHORA);
   assert.equal(sesion.autenticado, true);
   assert.equal(sesion.rol, "analista");
+  assert.equal(sesion.csrfToken, "csrf");
 });
 
-test("el rol manipulado en localStorage no otorga privilegios", () => {
-  const sesion = obtenerSesion(sesionCon({ rol: "Analista" }), AHORA);
-  assert.equal(sesion.usuario.rol, "Administrador");
-  assert.equal(tieneAccesoARuta(sesion.rol, "usuarios"), false);
+test("guardarSesion no almacena el token JWT", () => {
+  const storage = crearStorage();
+  guardarSesion({ usuario: { rol: "Supervisor" }, csrfToken: "abc", expiraEn: AHORA + 1000 }, storage);
+  assert.equal(storage.has("authToken"), false);
+  assert.equal(obtenerSesion(storage, AHORA).autenticado, true);
 });
 
-test("token expirado invalida la sesión", () => {
-  assert.equal(obtenerSesion(sesionCon({ rol: "Administrador", exp: AHORA / 1000 - 1 }), AHORA).autenticado, false);
+test("sesión expirada o sin token CSRF invalida la sesión", () => {
+  assert.equal(obtenerSesion(sesionCon({ expiraEn: AHORA - 1 }), AHORA).autenticado, false);
+  assert.equal(obtenerSesion(sesionCon({}, { csrfToken: "" }), AHORA).autenticado, false);
 });
 
-test("token malformado o rol desconocido invalida la sesión", () => {
-  assert.equal(obtenerSesion(crearStorage({ isAuthenticated: "true", authToken: "abc" }), AHORA).autenticado, false);
+test("rol desconocido o usuario corrupto invalida la sesión", () => {
   assert.equal(obtenerSesion(sesionCon({ rol: "root" }), AHORA).autenticado, false);
+  assert.equal(obtenerSesion(sesionCon({}, { usuario: "{no-json" }), AHORA).autenticado, false);
 });
 
 test("permisos por ruta según rol", () => {
@@ -73,6 +75,6 @@ test("destinoSeguro solo acepta rutas internas del panel", () => {
 test("limpiarSesion elimina las claves", () => {
   const storage = sesionCon({ rol: "Analista" });
   limpiarSesion(storage);
-  assert.equal(storage.has("authToken"), false);
+  assert.equal(storage.has("csrfToken"), false);
   assert.equal(storage.has("usuario"), false);
 });

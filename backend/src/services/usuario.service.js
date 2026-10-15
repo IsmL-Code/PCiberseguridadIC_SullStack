@@ -1,5 +1,10 @@
 const prisma = require("../database/prisma");
 const bcrypt = require("bcryptjs");
+const { invalidarEstado } = require("../utils/estadoUsuarioCache");
+const { paginarConTotal } = require("../utils/paginacion");
+
+
+const COSTO_BCRYPT = Math.min(14, Math.max(10, parseInt(process.env.BCRYPT_COST, 10) || 12));
 
 const camposPublicos = {
   id: true,
@@ -27,17 +32,16 @@ async function prepararDatos(datos, incluirPassword = true) {
   }
 
   if (incluirPassword || datos.password) {
-    datosPreparados.password = await bcrypt.hash(datos.password, 12);
+    datosPreparados.password = await bcrypt.hash(datos.password, COSTO_BCRYPT);
   }
 
   return datosPreparados;
 }
 
-function listar() {
-  return prisma.usuario.findMany({
-    select: camposPublicos,
-    orderBy: { createdAt: "desc" }
-  });
+async function listar(paginacion) {
+  const consulta = { select: camposPublicos, orderBy: { createdAt: "desc" } };
+  if (!paginacion) return prisma.usuario.findMany(consulta);
+  return paginarConTotal(prisma.usuario, consulta, paginacion);
 }
 
 function buscarPorId(id) {
@@ -52,19 +56,21 @@ async function crear(datos) {
 }
 
 async function actualizar(id, datos) {
-  return prisma.usuario.update({
+  const usuario = await prisma.usuario.update({
     where: { id },
     data: await prepararDatos(datos, false),
     select: camposPublicos
   });
+  invalidarEstado(id);
+  return usuario;
 }
 
 function eliminar(id) {
   return actualizarEstado(id, "DELETED");
 }
 
-function actualizarEstado(id, status) {
-  return prisma.usuario.update({
+async function actualizarEstado(id, status) {
+  const usuario = await prisma.usuario.update({
     where: { id },
     data: {
       status,
@@ -72,6 +78,8 @@ function actualizarEstado(id, status) {
     },
     select: camposPublicos
   });
+  invalidarEstado(id);
+  return usuario;
 }
 
 module.exports = { listar, buscarPorId, crear, actualizar, actualizarEstado, eliminar };

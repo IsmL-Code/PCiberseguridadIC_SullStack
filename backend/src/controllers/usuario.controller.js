@@ -1,24 +1,19 @@
 const usuarioService = require("../services/usuario.service");
-
-function obtenerIdValido(id) {
-  const idNumerico = Number(id);
-  return Number.isInteger(idNumerico) && idNumerico > 0 ? idNumerico : null;
-}
+const { registrarAuditoria } = require("../utils/auditoria");
+const { leerPaginacion, respuestaPaginada } = require("../utils/paginacion");
 
 async function listar(req, res, next) {
   try {
-    const usuarios = await usuarioService.listar();
-    res.json(usuarios);
+    const paginacion = leerPaginacion(req.query);
+    const resultado = await usuarioService.listar(paginacion);
+    res.json(paginacion ? respuestaPaginada(resultado.datos, resultado.total, paginacion) : resultado);
   } catch (error) {
     next(error);
   }
 }
 
 async function obtener(req, res, next) {
-  const id = obtenerIdValido(req.params.id);
-  if (!id) {
-    return res.status(400).json({ error: "El id debe ser un entero positivo" });
-  }
+  const id = Number(req.params.id);
 
   try {
     const usuario = await usuarioService.buscarPorId(id);
@@ -33,19 +28,9 @@ async function obtener(req, res, next) {
 }
 
 async function crear(req, res, next) {
-  if (!req.body || typeof req.body !== "object" || Array.isArray(req.body)) {
-    return res.status(400).json({ error: "El cuerpo de la solicitud debe ser un objeto JSON" });
-  }
-
-  const { nombre, apellido, email, password, rol } = req.body;
-  if (!nombre || !apellido || !email || !password || !rol) {
-    return res.status(400).json({
-      error: "nombre, apellido, email, password y rol son obligatorios"
-    });
-  }
-
   try {
     const usuario = await usuarioService.crear(req.body);
+    registrarAuditoria("usuario_creado", { usuarioId: usuario.id, rol: usuario.rol, porUsuarioId: Number(req.usuario?.sub) });
     res.status(201).json(usuario);
   } catch (error) {
     next(error);
@@ -53,16 +38,11 @@ async function crear(req, res, next) {
 }
 
 async function actualizar(req, res, next) {
-  const id = obtenerIdValido(req.params.id);
-  if (!id) {
-    return res.status(400).json({ error: "El id debe ser un entero positivo" });
-  }
-  if (!req.body || typeof req.body !== "object" || Array.isArray(req.body)) {
-    return res.status(400).json({ error: "El cuerpo de la solicitud debe ser un objeto JSON" });
-  }
+  const id = Number(req.params.id);
 
   try {
     const usuario = await usuarioService.actualizar(id, req.body);
+    registrarAuditoria("usuario_actualizado", { usuarioId: id, rol: usuario.rol, porUsuarioId: Number(req.usuario?.sub) });
     res.json(usuario);
   } catch (error) {
     next(error);
@@ -70,13 +50,11 @@ async function actualizar(req, res, next) {
 }
 
 async function actualizarEstado(req, res, next) {
-  const id = obtenerIdValido(req.params.id);
-  if (!id) {
-    return res.status(400).json({ error: "El id debe ser un entero positivo" });
-  }
+  const id = Number(req.params.id);
 
   try {
     const usuario = await usuarioService.actualizarEstado(id, req.body.status);
+    registrarAuditoria("usuario_estado_cambiado", { usuarioId: id, status: req.body.status, porUsuarioId: Number(req.usuario?.sub) });
     res.json(usuario);
   } catch (error) {
     next(error);
@@ -84,13 +62,11 @@ async function actualizarEstado(req, res, next) {
 }
 
 async function eliminar(req, res, next) {
-  const id = obtenerIdValido(req.params.id);
-  if (!id) {
-    return res.status(400).json({ error: "El id debe ser un entero positivo" });
-  }
+  const id = Number(req.params.id);
 
   try {
     await usuarioService.eliminar(id);
+    registrarAuditoria("usuario_eliminado", { usuarioId: id, porUsuarioId: Number(req.usuario?.sub) });
     res.status(204).send();
   } catch (error) {
     next(error);

@@ -62,6 +62,11 @@ Aplicación web para registrar y consultar incidentes de ciberseguridad. Incluye
 | `FRONTEND_URL` | Sí en producción | Origen del frontend permitido por CORS. Usa, por ejemplo, `http://localhost:5173` en desarrollo y el origen HTTPS real en producción. |
 | `NODE_ENV` | No | Usa `development`, `test` o `production`. El modo de producción requiere `JWT_SECRET` y un `FRONTEND_URL` HTTPS. |
 | `PORT` | No | Puerto HTTP de la API; por defecto `3000`. |
+| `LOGIN_MAX_INTENTOS` | No | Intentos de inicio de sesión permitidos por IP en la ventana; por defecto `4`. |
+| `LOGIN_VENTANA_MIN` | No | Duración en minutos de la ventana del límite de login; por defecto `1`. |
+| `API_MAX_PETICIONES` | No | Peticiones máximas por IP en la ventana general de la API; por defecto `300`. |
+| `USER_STATUS_CACHE_TTL_MS` | No | Duración en ms de la caché del estado del usuario; por defecto `5000`, máximo `60000`, `0` la desactiva. |
+| `BCRYPT_COST` | No | Costo de bcrypt, acotado entre `10` y `14`; por defecto `12`. |
 
 Ejemplo de configuración local:
 
@@ -95,8 +100,12 @@ Ejecuta los comandos de cada componente desde su propia carpeta.
 
 | Comando | Descripción |
 | --- | --- |
-| `npm run dev` | Inicia la API con recarga automática mediante Nodemon. |
-| `npm test` | Ejecuta las pruebas con el test runner integrado de Node.js. |
+| `npm run dev` | Inicia la API con recarga automática (`node --watch`). |
+| `npm test` | Ejecuta las pruebas de API con el test runner integrado de Node.js. |
+| `npm run test:jest` | Ejecuta las pruebas de reglas de negocio con Jest. |
+| `npm run test:jest:evidencia` | Ejecuta pruebas que **deben fallar** (2) para demostrar que la suite detecta errores. |
+| `npm run lint` | Ejecuta ESLint sobre el backend. |
+| `npm run audit:prod` | Audita las dependencias de producción. |
 | `npm run migrate:passwords` | Revisa hashes heredados de contraseñas; la migración requiere confirmación explícita. |
 | `npx prisma migrate deploy` | Aplica las migraciones pendientes a la base configurada. |
 
@@ -110,15 +119,18 @@ Ejecuta los comandos de cada componente desde su propia carpeta.
 | `npm run build` | Genera la compilación de producción en `dist/`. |
 | `npm run preview` | Sirve localmente la compilación generada. |
 | `npm run lint` | Ejecuta ESLint sobre el proyecto. |
+| `npm test` | Ejecuta las pruebas unitarias de utilidades. |
 
 ## API REST
 
-Todas las rutas están bajo `/api`. Salvo el inicio de sesión, requieren un token JWT en `Authorization: Bearer <token>`. Los errores se devuelven como JSON.
+Todas las rutas están bajo `/api`. Salvo el inicio y cierre de sesión, requieren sesión autenticada: el JWT viaja en una cookie `HttpOnly` (`authToken`, `SameSite=Strict`, `Secure` en producción) o en la cabecera `Authorization: Bearer <token>`. Con cookie, las peticiones que modifican datos exigen además la cabecera `X-CSRF-Token` con el valor devuelto por el login. La sesión dura 2 horas y los errores se devuelven como JSON.
 
 | Método | Ruta | Acceso | Descripción |
 | --- | --- | --- | --- |
-| `POST` | `/api/auth/login` | Público | Inicia sesión con `email` y `password`; devuelve el token y los datos públicos del usuario. |
-| `GET` | `/api/incidentes` | Autenticado, permiso de lectura | Lista incidentes; acepta los filtros opcionales `estado` y `prioridad`. |
+| `POST` | `/api/auth/login` | Público (límite de intentos) | Inicia sesión con `email` y `password`; establece la cookie de sesión y devuelve `csrfToken`, `expiraEn` y los datos públicos del usuario. |
+| `POST` | `/api/auth/logout` | Público | Cierra la sesión: revoca el token y borra la cookie. |
+| `GET` | `/api/incidentes` | Autenticado, permiso de lectura | Lista incidentes; acepta los filtros opcionales `estado` y `prioridad` y la paginación `pagina` y `limite` (máximo 100; sin ellos devuelve un arreglo). |
+| `GET` | `/api/incidentes/eliminados` | Solo administrador | Lista incidentes eliminados lógicamente; admite paginación. |
 | `GET` | `/api/incidentes/:id` | Autenticado, permiso de lectura | Consulta un incidente por ID, sujeto al alcance del rol. |
 | `POST` | `/api/incidentes` | Autenticado, permiso de creación | Crea un incidente. |
 | `PUT` | `/api/incidentes/:id` | Autenticado, permiso de edición | Actualiza un incidente. |
@@ -143,7 +155,7 @@ Prisma define los modelos en `backend/prisma/schema.prisma`; los cambios de esqu
 
 - **React, React DOM y React Router** construyen la interfaz de usuario y su navegación.
 - **Vite**, junto con sus complementos para React y Tailwind CSS, desarrolla y compila el frontend.
-- **Express** expone la API; **CORS** restringe los orígenes permitidos y **Zod** valida los datos recibidos.
+- **Express** expone la API; **Helmet** añade cabeceras de seguridad, **express-rate-limit** limita las peticiones, **CORS** restringe los orígenes permitidos y **Zod** valida los datos recibidos.
 - **Prisma Client** con el adaptador MariaDB/MySQL conecta la API a MySQL.
 - **bcryptjs** verifica y genera hashes de contraseñas; **jsonwebtoken** gestiona tokens de sesión.
 
@@ -161,15 +173,16 @@ En producción, despliega la API detrás de un proxy o servicio de entrada que g
 │   │   └── schema.prisma           # Modelos y enums de persistencia
 │   ├── scripts/                    # Tareas operativas, como hashes heredados
 │   ├── src/
-│   │   ├── config/                 # Configuración JWT
+│   │   ├── config/                 # Configuración JWT y de sesión (cookie)
 │   │   ├── controllers/            # Manejadores HTTP
 │   │   ├── database/               # Cliente Prisma y conexión
-│   │   ├── middlewares/            # Autenticación, permisos, validación y errores
+│   │   ├── middlewares/            # Autenticación, CSRF, límites, permisos, validación y errores
 │   │   ├── models/                 # Esquemas de validación y roles
 │   │   ├── routes/                 # Rutas de autenticación, incidentes y usuarios
 │   │   ├── services/               # Acceso y reglas de persistencia
-│   │   └── utils/                  # Utilidades de validación
-│   ├── tests/                      # Pruebas de API
+│   │   └── utils/                  # Paginación, auditoría, caché de estado y tokens revocados
+│   ├── tests/                      # Pruebas de API (node:test) y de reglas de negocio (Jest)
+│   ├── eslint.config.mjs           # Configuración de ESLint
 │   ├── .env.example                # Plantilla de configuración del backend
 │   └── docker-compose.yml          # MySQL local
 ├── frontend/
@@ -185,4 +198,6 @@ En producción, despliega la API detrás de un proxy o servicio de entrada que g
 
 ## Pruebas
 
-Las pruebas de API se ejecutan con `npm test` desde `backend/`. La prueba de incidentes sustituye los métodos del servicio de persistencia por implementaciones en memoria, por lo que el ciclo CRUD probado no modifica datos de MySQL. Hay pruebas de utilitarios del frontend junto a su código, pero actualmente `package.json` no define un comando para ejecutarlas.
+Las pruebas de API se ejecutan con `npm test` desde `backend/`. La prueba de incidentes sustituye los métodos del servicio de persistencia por implementaciones en memoria, por lo que el ciclo CRUD probado no modifica datos de MySQL. `npm run test:jest` valida reglas de negocio (visibilidad por rol, borrado lógico y paginación). En `frontend/mi-proyecto-plataformas/`, `npm test` ejecuta las pruebas unitarias de utilidades.
+
+Antes de publicar, ejecuta `npm run lint`, `npm test`, `npm run test:jest` y `npm run audit:prod` en el backend, y `npm run lint`, `npm test`, `npm run build` y `npm audit` en el frontend.
