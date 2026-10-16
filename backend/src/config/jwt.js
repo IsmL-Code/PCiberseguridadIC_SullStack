@@ -15,6 +15,7 @@ function obtenerSecretoJwt() {
 
   const secretoTemporal = crypto.randomBytes(32).toString("hex");
   process.env.JWT_SECRET = secretoTemporal;
+  // eslint-disable-next-line no-console -- Warn operators that this temporary secret is not production-safe.
   console.warn("JWT_SECRET no está configurado: se generó una clave temporal solo para este proceso.");
   return secretoTemporal;
 }

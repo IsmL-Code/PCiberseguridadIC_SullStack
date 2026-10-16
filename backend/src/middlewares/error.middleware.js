@@ -5,6 +5,7 @@ function noEncontrado(req, res) {
 // Express exige 4 parámetros para identificar un manejador de errores
 // eslint-disable-next-line no-unused-vars
 function manejarError(error, req, res, next) {
+ // eslint-disable-next-line no-console -- Keep unexpected server errors visible in the server logs.
  console.error(error);
 
  if (error instanceof SyntaxError && error.status === 400 && "body" in error) {

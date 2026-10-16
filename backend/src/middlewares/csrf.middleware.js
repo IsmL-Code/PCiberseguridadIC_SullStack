@@ -13,7 +13,9 @@ function verificarOrigen(origenesPermitidos) {
 }
 
 function tokenCsrfValido(esperado, recibido) {
-  if (typeof esperado !== "string" || typeof recibido !== "string") return false;
+  if (typeof esperado !== "string" || typeof recibido !== "string") {
+    return false;
+  }
   const a = Buffer.from(esperado);
   const b = Buffer.from(recibido);
   return a.length === b.length && crypto.timingSafeEqual(a, b);

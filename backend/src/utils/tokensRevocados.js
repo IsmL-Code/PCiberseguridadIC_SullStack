@@ -5,7 +5,9 @@ const INTERVALO_PURGA_MS = 60 * 1000;
 function purgarExpirados() {
   const ahora = Date.now();
   for (const [id, exp] of revocados) {
-    if (exp <= ahora) revocados.delete(id);
+    if (exp <= ahora) {
+      revocados.delete(id);
+    }
   }
 }
 
@@ -13,7 +15,9 @@ function purgarExpirados() {
 setInterval(purgarExpirados, INTERVALO_PURGA_MS).unref();
 
 function revocarToken(jti, expSegundos) {
-  if (!jti) return;
+  if (!jti) {
+    return;
+  }
   revocados.set(jti, expSegundos * 1000);
 }
 

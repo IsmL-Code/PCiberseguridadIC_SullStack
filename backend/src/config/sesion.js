@@ -13,11 +13,15 @@ function opcionesCookieSesion() {
 
 function leerCookie(req, nombre) {
   const encabezado = req.headers.cookie;
-  if (!encabezado) return null;
+  if (!encabezado) {
+    return null;
+  }
 
   for (const par of encabezado.split(";")) {
     const indice = par.indexOf("=");
-    if (indice < 0 || par.slice(0, indice).trim() !== nombre) continue;
+    if (indice < 0 || par.slice(0, indice).trim() !== nombre) {
+      continue;
+    }
     try {
       return decodeURIComponent(par.slice(indice + 1).trim());
     } catch {

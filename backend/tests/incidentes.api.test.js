@@ -59,13 +59,17 @@ before(async () => {
   incidenteService.buscarPorId = async (id) => registros.find((registro) => registro.id === id) || null;
   incidenteService.actualizar = async (id, _usuarioId, datos) => {
     const indice = registros.findIndex((registro) => registro.id === id);
-    if (indice < 0) throw Object.assign(new Error("No encontrado"), { code: "P2025" });
+    if (indice < 0) {
+      throw Object.assign(new Error("No encontrado"), { code: "P2025" });
+    }
     registros[indice] = { ...registros[indice], ...datos };
     return registros[indice];
   };
   incidenteService.eliminar = async (id) => {
     const indice = registros.findIndex((registro) => registro.id === id);
-    if (indice < 0) throw Object.assign(new Error("No encontrado"), { code: "P2025" });
+    if (indice < 0) {
+      throw Object.assign(new Error("No encontrado"), { code: "P2025" });
+    }
     registros.splice(indice, 1);
   };
   incidenteService.listarEliminados = async () => registros.filter((registro) => registro.deletedAt);

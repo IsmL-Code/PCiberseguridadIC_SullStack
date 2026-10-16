@@ -67,7 +67,9 @@ async function verificarToken(req, res, next) {
         select: { status: true }
       });
       status = actual ? actual.status : null;
-      if (status) guardarEstado(usuarioId, status, versionInicial);
+      if (status) {
+        guardarEstado(usuarioId, status, versionInicial);
+      }
     }
     if (status !== "ACTIVE") {
       return res.status(401).json({ error: "Sesión no válida" });

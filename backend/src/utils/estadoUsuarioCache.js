@@ -16,7 +16,9 @@ function versionActual() {
 
 function obtenerEstado(id) {
   const entrada = cache.get(id);
-  if (!entrada) return undefined;
+  if (!entrada) {
+    return undefined;
+  }
   if (entrada.expira <= Date.now()) {
     cache.delete(id);
     return undefined;
@@ -25,8 +27,12 @@ function obtenerEstado(id) {
 }
 
 function guardarEstado(id, status, versionInicial) {
-  if (TTL_MS <= 0 || versionInicial !== version) return;
-  if (cache.size >= MAX_ENTRADAS) cache.delete(cache.keys().next().value);
+  if (TTL_MS <= 0 || versionInicial !== version) {
+    return;
+  }
+  if (cache.size >= MAX_ENTRADAS) {
+    cache.delete(cache.keys().next().value);
+  }
   cache.set(id, { status, expira: Date.now() + TTL_MS });
 }
 

@@ -40,7 +40,9 @@ async function prepararDatos(datos, incluirPassword = true) {
 
 async function listar(paginacion) {
   const consulta = { select: camposPublicos, orderBy: { createdAt: "desc" } };
-  if (!paginacion) return prisma.usuario.findMany(consulta);
+  if (!paginacion) {
+    return prisma.usuario.findMany(consulta);
+  }
   return paginarConTotal(prisma.usuario, consulta, paginacion);
 }
 

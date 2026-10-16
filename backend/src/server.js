@@ -11,6 +11,7 @@ if (process.env.NODE_ENV === "production") {
 const app = require("./app");
 const prisma = require("./database/prisma");
 const servidor = app.listen(process.env.PORT || 3000, () => {
+ // eslint-disable-next-line no-console -- Confirm successful server startup in the process logs.
  console.log("API disponible en http://localhost:3000");
 });
 async function cerrar() {

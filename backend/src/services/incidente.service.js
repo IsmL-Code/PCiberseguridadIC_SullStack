@@ -10,7 +10,9 @@ function crear(datos) {
 }
 
 async function consultarPagina(consulta, paginacion) {
-  if (!paginacion) return prisma.incidente.findMany(consulta);
+  if (!paginacion) {
+    return prisma.incidente.findMany(consulta);
+  }
   return paginarConTotal(prisma.incidente, consulta, paginacion);
 }
 
@@ -36,7 +38,6 @@ function listarEliminados(paginacion) {
     orderBy: { deletedAt: "desc" }
   }, paginacion);
 }
-
 function buscarPorId(id, usuarioId, rol) {
   const rolNormalizado = normalizarRol(rol);
   const where = rolNormalizado === "administrador" || rolNormalizado === "supervisor"

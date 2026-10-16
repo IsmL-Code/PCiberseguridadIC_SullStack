@@ -25,17 +25,25 @@ function esTextoLegible(valor) {
   !/\p{L}/u.test(texto)
   || /([\p{L}\p{N}])\1{3,}/u.test(texto)
   || /qwerty|asdf|zxcv|qazwsx|123456|654321/u.test(texto)
- ) return false;
+ ) {
+  return false;
+ }
 
  const palabras = texto.match(/[\p{L}\p{N}]+/gu) || [];
  return palabras.every((palabra) => {
-  if (palabra.length < 8) return true;
+  if (palabra.length < 8) {
+   return true;
+  }
 
   const letras = [...palabra].filter((caracter) => /\p{L}/u.test(caracter));
-  if (letras.length / palabra.length < 0.7) return false;
+  if (letras.length / palabra.length < 0.7) {
+   return false;
+  }
 
   const letrasUnicas = new Set(letras);
-  if (letrasUnicas.size / letras.length < 0.45) return false;
+  if (letrasUnicas.size / letras.length < 0.45) {
+   return false;
+  }
 
   const vocales = letras.filter((letra) => "aeiou".includes(letra)).length;
   return vocales / letras.length >= 0.12;
@@ -43,4 +51,3 @@ function esTextoLegible(valor) {
 }
 
 module.exports = { mensajeTextoInvalido, mensajeContenidoPeligroso, esContenidoSeguro, esTextoLegible };
-

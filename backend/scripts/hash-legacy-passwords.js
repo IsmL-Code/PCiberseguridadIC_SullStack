@@ -10,7 +10,9 @@ async function migrarPasswords() {
   const pendientes = usuarios.filter(({ password }) => !/^\$2[aby]\$/.test(password));
 
   if (process.env.CONFIRM_LEGACY_PASSWORD_HASH_MIGRATION !== "true") {
+    // eslint-disable-next-line no-console -- Report migration status to the operator.
     console.log(`${pendientes.length} contraseña(s) requieren hash bcrypt. No se modificó la base.`);
+    // eslint-disable-next-line no-console -- Provide the operator with the confirmation command.
     console.log("Para ejecutar la migración: CONFIRM_LEGACY_PASSWORD_HASH_MIGRATION=true npm run migrate:passwords");
     return;
   }
@@ -22,11 +24,13 @@ async function migrarPasswords() {
     });
   }
 
+  // eslint-disable-next-line no-console -- Report migration results to the operator.
   console.log(`${pendientes.length} contraseña(s) migradas a bcrypt.`);
 }
 
 migrarPasswords()
   .catch((error) => {
+    // eslint-disable-next-line no-console -- Surface migration failures in the CLI.
     console.error("No se pudieron migrar las contraseñas heredadas:", error.message);
     process.exitCode = 1;
   })
