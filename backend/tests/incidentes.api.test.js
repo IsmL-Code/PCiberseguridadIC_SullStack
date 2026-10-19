@@ -39,9 +39,11 @@ async function solicitar(ruta, opciones = {}, rol = "Administrador") {
 
 let estadoUsuario = "ACTIVE";
 const findUniqueOriginal = prisma.usuario.findUnique;
+const queryRawOriginal = prisma.$queryRaw;
 
 before(async () => {
   prisma.usuario.findUnique = async () => ({ status: estadoUsuario });
+  prisma.$queryRaw = async () => [];
   metodosOriginales = { ...incidenteService };
   incidenteService.listar = async ({ estado, prioridad }, paginacion) => {
     const filtrados = registros.filter((registro) =>
@@ -89,7 +91,48 @@ after(async () => {
   await new Promise((resolve, reject) => servidor.close((error) => error ? reject(error) : resolve()));
   Object.assign(incidenteService, metodosOriginales);
   prisma.usuario.findUnique = findUniqueOriginal;
+  prisma.$queryRaw = queryRawOriginal;
   await prisma.$disconnect();
+});
+
+test("health check confirma la disponibilidad de la API y PostgreSQL", async () => {
+  const respuesta = await fetch(new URL("/health", url));
+  assert.equal(respuesta.status, 200);
+  assert.deepEqual(await respuesta.json(), { status: "ok", database: "ok" });
+});
+
+test("health check responde 503 y registra el fallo si PostgreSQL no está disponible", async () => {
+  const consultaOriginal = prisma.$queryRaw;
+  const errorOriginal = Reflect.get(console, "error");
+  prisma.$queryRaw = async () => {
+    throw new Error("Base de datos no disponible");
+  };
+  Reflect.set(console, "error", () => {});
+
+  try {
+    const respuesta = await fetch(new URL("/health", url));
+    assert.equal(respuesta.status, 503);
+    assert.deepEqual(await respuesta.json(), { status: "error", database: "unavailable" });
+  } finally {
+    prisma.$queryRaw = consultaOriginal;
+    Reflect.set(console, "error", errorOriginal);
+  }
+});
+
+test("las solicitudes se registran en formato JSON estructurado", async () => {
+  const logs = [];
+  const infoOriginal = Reflect.get(console, "info");
+  Reflect.set(console, "info", (mensaje) => logs.push(JSON.parse(mensaje)));
+
+  try {
+    await fetch(new URL("/health", url));
+  } finally {
+    Reflect.set(console, "info", infoOriginal);
+  }
+
+  assert.ok(logs.some((log) =>
+    log.tipo === "solicitud_http" && log.metodo === "GET" && log.ruta === "/health" && log.estado === 200
+  ));
 });
 
 test("1. rechaza consulta sin token", async () => {

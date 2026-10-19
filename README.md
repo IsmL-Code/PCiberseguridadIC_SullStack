@@ -127,7 +127,7 @@ Ejecuta los comandos de cada componente desde su propia carpeta.
 
 ## API REST
 
-Todas las rutas están bajo `/api`. Salvo el inicio y cierre de sesión, requieren sesión autenticada: el JWT viaja en una cookie `HttpOnly` (`authToken`, `SameSite=Strict`, `Secure` en producción) o en la cabecera `Authorization: Bearer <token>`. Con cookie, las peticiones que modifican datos exigen además la cabecera `X-CSRF-Token` con el valor devuelto por el login. La sesión dura 2 horas y los errores se devuelven como JSON.
+Todas las rutas de negocio están bajo `/api`. `GET /health` es público y comprueba la disponibilidad de la API y de PostgreSQL; devuelve `200` si ambas están disponibles y `503` si falla la base de datos. Salvo el inicio y cierre de sesión, las rutas de negocio requieren sesión autenticada: el JWT viaja en una cookie `HttpOnly` (`authToken`, `SameSite=Strict`, `Secure` en producción) o en la cabecera `Authorization: Bearer <token>`. Con cookie, las peticiones que modifican datos exigen además la cabecera `X-CSRF-Token` con el valor devuelto por el login. La sesión dura 2 horas y los errores se devuelven como JSON.
 
 | Método | Ruta | Acceso | Descripción |
 | --- | --- | --- | --- |
@@ -145,6 +145,8 @@ Todas las rutas están bajo `/api`. Salvo el inicio y cierre de sesión, requier
 | `PUT` | `/api/usuarios/:id` | Solo administrador | Actualiza un usuario. |
 | `PATCH` | `/api/usuarios/:id/estado` | Solo administrador | Cambia el estado de un usuario. |
 | `DELETE` | `/api/usuarios/:id` | Solo administrador | Marca al usuario como eliminado. |
+
+Las solicitudes HTTP se registran como JSON en la salida estándar, sin incluir query strings ni credenciales. Render recoge esa salida en los logs del servicio; la retención disponible depende del plan de Render.
 
 Los roles admitidos son `Administrador`, `Analista` y `Supervisor`. Los incidentes tienen tipo, prioridad (`BAJA`, `MEDIA`, `ALTA`, `CRITICA`) y estado (`ABIERTO`, `EN_PROCESO`, `CERRADO`). Administradores y supervisores pueden consultar el conjunto de incidentes; los analistas trabajan con los propios. La autorización efectiva de cada operación se aplica en la API.
 
@@ -180,6 +182,8 @@ Variables y comandos para producción (backend):
 | `JWT_SECRET`, `FRONTEND_URL` | Obligatorios en producción; `FRONTEND_URL` es el origen HTTPS exacto del frontend. |
 | `TRUST_PROXY` | `1` si la API está detrás de un proxy del proveedor, para que los límites usen la IP real del cliente. |
 | `COOKIE_SAMESITE` | `strict` si frontend y API comparten dominio; `none` si están en dominios distintos (requiere HTTPS). |
+
+Render utiliza `GET /health` para comprobar la disponibilidad de la API y la conexión PostgreSQL antes de enrutar tráfico.
 
 Frontend: define `VITE_API_URL` al compilar (si se omite en producción, usa el mismo origen). El repositorio incluye `public/_redirects` y `vercel.json` para que las rutas de la SPA funcionen al recargar. Define una Content-Security-Policy en el servidor web con la URL de la API en `connect-src`.
 
