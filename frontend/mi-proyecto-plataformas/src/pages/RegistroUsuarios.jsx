@@ -1,5 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { actualizarUsuario, crearUsuario, eliminarUsuario, listarUsuarios } from "../services/usuariosApi";
+import {
+  esNombrePersonaValido,
+  esPasswordSegura,
+  mensajeNombreInvalido,
+  mensajePasswordInvalida
+} from "../utils/validacionUsuario";
 
 const formularioVacio = {
   nombre: "",
@@ -38,6 +44,12 @@ export default function RegistroUsuarios() {
   const [usuarioAEliminar, setUsuarioAEliminar] = useState(null);
   const [eliminando, setEliminando] = useState(false);
   const [busqueda, setBusqueda] = useState("");
+
+  useEffect(() => {
+    if (!error) return;
+    const temporizador = setTimeout(() => setError(""), 5000);
+    return () => clearTimeout(temporizador);
+  }, [error]);
   const usuariosVisibles = useMemo(() => {
     const termino = busqueda.trim().toLowerCase();
     return usuarios.filter((usuario) => {
@@ -111,6 +123,20 @@ export default function RegistroUsuarios() {
 
     if (!usuarioEnEdicion && formulario.password !== confirmarPassword) {
       setError("Las contraseñas no coinciden.");
+      return;
+    }
+
+    const datosValidacion = { ...formulario, nombre: formulario.nombre.trim(), apellido: formulario.apellido.trim() };
+    if (!esNombrePersonaValido(datosValidacion.nombre)) {
+      setError(`Nombre: ${mensajeNombreInvalido}`);
+      return;
+    }
+    if (!esNombrePersonaValido(datosValidacion.apellido)) {
+      setError(`Apellido: ${mensajeNombreInvalido}`);
+      return;
+    }
+    if ((!usuarioEnEdicion || formulario.password) && !esPasswordSegura(formulario.password, datosValidacion)) {
+      setError(mensajePasswordInvalida);
       return;
     }
 
@@ -191,7 +217,23 @@ export default function RegistroUsuarios() {
       </div>
 
       {mensaje && <p className="dashboard-message dashboard-message--success" role="status">{mensaje}</p>}
-      {error && <p className="dashboard-message dashboard-message--error" role="alert">{error}</p>}
+      {error && (
+        <div
+          role="alert"
+          aria-live="assertive"
+          className="fixed right-4 top-4 z-[1100] flex max-w-[calc(100vw-2rem)] items-start gap-3 rounded-md border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800 shadow-lg"
+        >
+          <span className="flex-1">{error}</span>
+          <button
+            type="button"
+            aria-label="Cerrar aviso"
+            onClick={() => setError("")}
+            className="shrink-0 border-0 bg-transparent font-bold text-red-800"
+          >
+            ×
+          </button>
+        </div>
+      )}
 
       {mostrarFormulario && (
         <div className="user-form-overlay" role="presentation">
@@ -209,7 +251,6 @@ export default function RegistroUsuarios() {
             <p className="user-form__description">
               {usuarioEnEdicion ? "Actualiza los datos de la cuenta." : "Completa los datos para crear una cuenta en la plataforma."}
             </p>
-            {error && <p className="dashboard-message dashboard-message--error user-form__error" role="alert">{error}</p>}
             <label className="user-form__field">
               <span>Nombre</span>
               <input name="nombre" value={formulario.nombre} onChange={handleChange} maxLength={100} autoComplete="given-name" required />

@@ -1,17 +1,16 @@
 services:
-  mysql:
-    image: mysql:8.4
+  postgres:
+    image: postgres:16
     environment:
-      MYSQL_ROOT_PASSWORD: root_segura
-      MYSQL_DATABASE: incidentes_ic
-      MYSQL_USER: app_user
-      MYSQL_PASSWORD: app_segura
+      POSTGRES_DB: incidentes_ic
+      POSTGRES_USER: app_user
+      POSTGRES_PASSWORD: app_segura
     ports:
-      - "3306:3306"
+      - "5432:5432"
     volumes:
       - type: volume
-        source: mysql_data
-        target: /var/lib/mysql
+        source: postgres_data
+        target: /var/lib/postgresql/data
 
 volumes:
-  mysql_data:
+  postgres_data:

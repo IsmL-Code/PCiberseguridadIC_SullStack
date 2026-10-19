@@ -4,7 +4,7 @@ const jwt = require("jsonwebtoken");
 
 process.env.NODE_ENV = "test";
 process.env.JWT_SECRET = "test-only-secret-with-at-least-32-characters";
-process.env.DATABASE_URL ||= "mysql://test:test@127.0.0.1:3306/test_db";
+process.env.DATABASE_URL ||= "postgresql://user:pass@127.0.0.1:5432/test_db";
 
 const app = require("../src/app");
 const incidenteService = require("../src/services/incidente.service");

@@ -134,13 +134,18 @@ function ListaIncidentes({
     const camposObligatorios = [
       { nombre: 'El título', valor: formData.tituloIncidente, minimo: 5 },
       { nombre: 'El tipo', valor: formData.tipo },
+      {
+        nombre: 'El sistema afectado',
+        valor: formData.sistemaAfectado,
+        vacio: 'Por favor, llene el campo de sistema afectado.'
+      },
       { nombre: 'La descripción', valor: formData.descripcion, minimo: 10 }
     ];
 
     for (const campo of camposObligatorios) {
       const valor = String(campo.valor || '').trim();
       if (!valor) {
-        setToastValidacion({ mensaje: `${campo.nombre} es obligatorio.` });
+        setToastValidacion({ mensaje: campo.vacio || `${campo.nombre} es obligatorio.` });
         return;
       }
       if (valor.length < campo.minimo) {
@@ -348,6 +353,7 @@ function ListaIncidentes({
                     value={formData.sistemaAfectado} 
                     onChange={handleChange} 
                     placeholder="Ej. Mac OS" 
+                    required
                     style={inputStyle}
                   />
                 </div>

@@ -1,4 +1,4 @@
-﻿const { z } = require("zod");
+const { z } = require("zod");
 const {
  mensajeTextoInvalido,
  mensajeContenidoPeligroso,
@@ -23,9 +23,10 @@ const incidenteSchema = z.object({
   .refine(esContenidoSeguro, mensajeContenidoPeligroso)
   .refine(esTextoLegible, mensajeTextoInvalido),
  tipo: z.enum(tiposIncidente),
- sistemaAfectado: z.string().trim().max(100)
-  .refine((valor) => !valor || esContenidoSeguro(valor), mensajeContenidoPeligroso)
-  .refine((valor) => !valor || esTextoLegible(valor), mensajeTextoInvalido).optional(),
+ sistemaAfectado: z.string({ error: "Por favor, llene el campo de sistema afectado." }).trim()
+  .min(1, "Por favor, llene el campo de sistema afectado.").max(100)
+  .refine(esContenidoSeguro, mensajeContenidoPeligroso)
+  .refine(esTextoLegible, mensajeTextoInvalido),
  descripcion: z.string().trim().min(10).max(2000)
   .refine(esContenidoSeguro, mensajeContenidoPeligroso)
   .refine(esTextoLegible, mensajeTextoInvalido),

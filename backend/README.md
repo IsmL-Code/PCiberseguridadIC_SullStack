@@ -1,5 +1,11 @@
 # Backend de la plataforma
 
+## Cambio de base de datos
+
+Con fines prácticos y de portabilidad, la base de datos del proyecto se migró de MySQL a PostgreSQL. PostgreSQL cuenta con una oferta de servicio administrado en prácticamente todas las plataformas de despliegue (Render, Railway, Heroku, Fly.io, Supabase, Neon, AWS RDS, Google Cloud SQL, Azure, entre otras), con planes gratuitos o de bajo costo que facilitan las fases de prueba y académicas. Esto evita tener que montar y mantener un servidor de base de datos propio, y aporta respaldos automáticos, actualizaciones de seguridad, escalado y monitoreo gestionados por el proveedor.
+
+Para ejecutarlo en local: `docker compose up -d`, `npx prisma migrate deploy` y `npm run dev`. `DATABASE_URL` usa el formato `postgresql://usuario:clave@host:5432/base?schema=public`.
+
 ## Configuración
 
 Configura `DATABASE_URL`, `JWT_SECRET`, `FRONTEND_URL`, `NODE_ENV` y `PORT` en el entorno o en un archivo `.env` local no versionado. En producción, `JWT_SECRET` es obligatorio y debe contener al menos 32 caracteres aleatorios; `FRONTEND_URL` debe ser el origen HTTPS exacto del cliente. No copies una clave de ejemplo a producción ni subas secretos al repositorio.

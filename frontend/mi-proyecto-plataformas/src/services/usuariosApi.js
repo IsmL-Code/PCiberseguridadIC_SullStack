@@ -1,6 +1,8 @@
 import { fetchConSesion } from "./fetchConSesion";
 
-const API_URL = `${import.meta.env.VITE_API_URL || "http://localhost:3000"}/api/usuarios`;
+import { API_BASE_URL } from "../config/api";
+
+const API_URL = `${API_BASE_URL}/api/usuarios`;
 
 function encabezadosAutenticacion() {
   const csrfToken = localStorage.getItem("csrfToken");

@@ -1,16 +1,20 @@
 # Plataforma de gestión de incidentes de ciberseguridad
 
-Aplicación web para registrar y consultar incidentes de ciberseguridad. Incluye una API REST con autenticación y control de acceso, una interfaz React y persistencia en MySQL mediante Prisma.
+Aplicación web para registrar y consultar incidentes de ciberseguridad. Incluye una API REST con autenticación y control de acceso, una interfaz React y persistencia en PostgreSQL mediante Prisma.
+
+## Cambio de base de datos
+
+Con fines prácticos y de portabilidad, la base de datos del proyecto se migró de MySQL a PostgreSQL. PostgreSQL cuenta con una oferta de servicio administrado en prácticamente todas las plataformas de despliegue (Render, Railway, Heroku, Fly.io, Supabase, Neon, AWS RDS, Google Cloud SQL, Azure, entre otras), con planes gratuitos o de bajo costo que facilitan las fases de prueba y académicas. Esto evita tener que montar y mantener un servidor de base de datos propio, y aporta respaldos automáticos, actualizaciones de seguridad, escalado y monitoreo gestionados por el proveedor.
 
 ## Requisitos
 
 - Node.js `^20.19.0` o `>=22.12.0` y npm (requisito de Vite).
-- Docker Compose para iniciar MySQL localmente, o una instancia MySQL 8 compatible.
+- Docker Compose para iniciar PostgreSQL localmente, o una instancia PostgreSQL 14+ compatible.
 - Git, si se clona el repositorio.
 
 ## Instalación y ejecución local
 
-1. Inicia MySQL desde la raíz del repositorio:
+1. Inicia PostgreSQL desde la raíz del repositorio:
 
    ```bash
    docker compose -f backend/docker-compose.yml up -d
@@ -57,7 +61,7 @@ Aplicación web para registrar y consultar incidentes de ciberseguridad. Incluye
 
 | Variable | Requerida | Descripción |
 | --- | --- | --- |
-| `DATABASE_URL` | Sí | URL de conexión MySQL con formato `mysql://usuario:contraseña@host:puerto/base`. Codifica caracteres especiales de usuario o contraseña como URL. |
+| `DATABASE_URL` | Sí | URL de conexión PostgreSQL con formato `postgresql://usuario:contraseña@host:puerto/base?schema=public`. Codifica caracteres especiales de usuario o contraseña como URL. |
 | `JWT_SECRET` | Sí en producción | Secreto para firmar tokens; debe ser aleatorio y tener al menos 32 caracteres. Fuera de producción, si no está configurado, se genera un secreto temporal que cambia al reiniciar el proceso. |
 | `FRONTEND_URL` | Sí en producción | Origen del frontend permitido por CORS. Usa, por ejemplo, `http://localhost:5173` en desarrollo y el origen HTTPS real en producción. |
 | `NODE_ENV` | No | Usa `development`, `test` o `production`. El modo de producción requiere `JWT_SECRET` y un `FRONTEND_URL` HTTPS. |
@@ -71,7 +75,7 @@ Aplicación web para registrar y consultar incidentes de ciberseguridad. Incluye
 Ejemplo de configuración local:
 
 ```dotenv
-DATABASE_URL="mysql://app_user:app_segura@localhost:3306/incidentes_ic"
+DATABASE_URL="postgresql://app_user:app_segura@localhost:5432/incidentes_ic?schema=public"
 JWT_SECRET="secreto-local-aleatorio-de-al-menos-32-caracteres"
 FRONTEND_URL="http://localhost:5173"
 NODE_ENV="development"
@@ -156,12 +160,30 @@ Prisma define los modelos en `backend/prisma/schema.prisma`; los cambios de esqu
 - **React, React DOM y React Router** construyen la interfaz de usuario y su navegación.
 - **Vite**, junto con sus complementos para React y Tailwind CSS, desarrolla y compila el frontend.
 - **Express** expone la API; **Helmet** añade cabeceras de seguridad, **express-rate-limit** limita las peticiones, **CORS** restringe los orígenes permitidos y **Zod** valida los datos recibidos.
-- **Prisma Client** con el adaptador MariaDB/MySQL conecta la API a MySQL.
+- **Prisma Client** con el adaptador `@prisma/adapter-pg` conecta la API a PostgreSQL.
 - **bcryptjs** verifica y genera hashes de contraseñas; **jsonwebtoken** gestiona tokens de sesión.
 
 El código del backend separa rutas, controladores y servicios: las rutas aplican autenticación, autorización y validación; los controladores gestionan el intercambio HTTP y los servicios encapsulan el acceso a datos. Esta separación mantiene las reglas de acceso y persistencia fuera del manejo de transporte. Los incidentes y usuarios se eliminan lógicamente para conservar sus registros y relaciones en la base.
 
 En producción, despliega la API detrás de un proxy o servicio de entrada que gestione HTTPS, configure correctamente los encabezados de proxy y proteja la base de datos. La API no termina TLS directamente. Configura el origen HTTPS exacto del frontend y credenciales seguras fuera del repositorio.
+
+## Despliegue
+
+Variables y comandos para producción (backend):
+
+| Elemento | Valor |
+| --- | --- |
+| Build | `npm ci && npm run build && npm run migrate:deploy` |
+| Inicio | `npm start` |
+| `NODE_ENV` | `production` |
+| `DATABASE_URL` | URL de la base PostgreSQL administrada (con `?sslmode=require` si el proveedor lo exige). |
+| `JWT_SECRET`, `FRONTEND_URL` | Obligatorios en producción; `FRONTEND_URL` es el origen HTTPS exacto del frontend. |
+| `TRUST_PROXY` | `1` si la API está detrás de un proxy del proveedor, para que los límites usen la IP real del cliente. |
+| `COOKIE_SAMESITE` | `strict` si frontend y API comparten dominio; `none` si están en dominios distintos (requiere HTTPS). |
+
+Frontend: define `VITE_API_URL` al compilar (si se omite en producción, usa el mismo origen). El repositorio incluye `public/_redirects` y `vercel.json` para que las rutas de la SPA funcionen al recargar. Define una Content-Security-Policy en el servidor web con la URL de la API en `connect-src`.
+
+Limitaciones conocidas: la lista de tokens revocados (cierre de sesión) y la caché del estado de usuario viven en la memoria del proceso. Con más de una instancia o tras un reinicio no se comparten; para escalar horizontalmente muévelas a un almacén compartido como Redis. Cambia o elimina cualquier usuario de prueba antes de publicar.
 
 ## Estructura del repositorio
 
@@ -184,7 +206,7 @@ En producción, despliega la API detrás de un proxy o servicio de entrada que g
 │   ├── tests/                      # Pruebas de API (node:test) y de reglas de negocio (Jest)
 │   ├── eslint.config.mjs           # Configuración de ESLint
 │   ├── .env.example                # Plantilla de configuración del backend
-│   └── docker-compose.yml          # MySQL local
+│   └── docker-compose.yml          # PostgreSQL local
 ├── frontend/
 │   └── mi-proyecto-plataformas/
 │       └── src/
@@ -198,6 +220,6 @@ En producción, despliega la API detrás de un proxy o servicio de entrada que g
 
 ## Pruebas
 
-Las pruebas de API se ejecutan con `npm test` desde `backend/`. La prueba de incidentes sustituye los métodos del servicio de persistencia por implementaciones en memoria, por lo que el ciclo CRUD probado no modifica datos de MySQL. `npm run test:jest` valida reglas de negocio (visibilidad por rol, borrado lógico y paginación). En `frontend/mi-proyecto-plataformas/`, `npm test` ejecuta las pruebas unitarias de utilidades.
+Las pruebas de API se ejecutan con `npm test` desde `backend/`. La prueba de incidentes sustituye los métodos del servicio de persistencia por implementaciones en memoria, por lo que el ciclo CRUD probado no modifica datos de PostgreSQL. `npm run test:jest` valida reglas de negocio (visibilidad por rol, borrado lógico y paginación). En `frontend/mi-proyecto-plataformas/`, `npm test` ejecuta las pruebas unitarias de utilidades.
 
 Antes de publicar, ejecuta `npm run lint`, `npm test`, `npm run test:jest` y `npm run audit:prod` en el backend, y `npm run lint`, `npm test`, `npm run build` y `npm audit` en el frontend.

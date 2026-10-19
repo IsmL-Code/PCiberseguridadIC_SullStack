@@ -9,6 +9,11 @@ const { verificarOrigen } = require("./middlewares/csrf.middleware");
 const { limitarPeticiones } = require("./middlewares/limitarPeticiones.middleware");
 
 const app = express();
+// Detrás de un proxy (Render, Railway, etc.) permite que los límites usen la IP real del cliente
+if (process.env.TRUST_PROXY) {
+  const proxies = Number(process.env.TRUST_PROXY);
+  app.set("trust proxy", Number.isNaN(proxies) ? process.env.TRUST_PROXY : proxies);
+}
 app.use(helmet());
 const origenFrontend = process.env.FRONTEND_URL
   ? new URL(process.env.FRONTEND_URL).origin

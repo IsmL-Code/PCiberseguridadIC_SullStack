@@ -79,11 +79,11 @@ export default function DashboardLayout() {
                     <span>Registrar nuevo usuario</span>
                   </NavLink>
                   <NavLink to="/dashboard/usuarios-fuera-servicio" className={claseItem} onClick={cerrarMenu}>
-                    <DashboardIcon name="pin" />
+                    <DashboardIcon name="userOff" />
                     <span>Usuarios fuera de servicio</span>
                   </NavLink>
                   <NavLink to="/dashboard/incidentes-eliminados" className={claseItem} onClick={cerrarMenu}>
-                    <DashboardIcon name="mail" />
+                    <DashboardIcon name="trash" />
                     <span>Incidentes eliminados</span>
                   </NavLink>
                 </>

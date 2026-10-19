@@ -2,11 +2,23 @@ const NOMBRE_COOKIE_SESION = "authToken";
 const DURACION_SESION_MS = 2 * 60 * 60 * 1000;
 const METODOS_SEGUROS = new Set(["GET", "HEAD", "OPTIONS"]);
 
+function obtenerSameSite() {
+  const valor = String(process.env.COOKIE_SAMESITE || "strict").toLowerCase();
+  if (!["strict", "lax", "none"].includes(valor)) {
+    throw new Error("COOKIE_SAMESITE debe ser strict, lax o none");
+  }
+  if (valor === "none" && process.env.NODE_ENV !== "production") {
+    return "lax";
+  }
+  return valor;
+}
+
+// Con frontend y API en dominios distintos usa COOKIE_SAMESITE=none (requiere HTTPS)
 function opcionesCookieSesion() {
   return {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
+    sameSite: obtenerSameSite(),
     path: "/"
   };
 }
