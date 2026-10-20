@@ -1,5 +1,7 @@
 ﻿import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-import { obtenerSesion } from "./utils/sesion";
+import { useState, useEffect } from "react";
+import { obtenerSesion, limpiarSesionLocal } from "./utils/sesion";
+import { obtenerUsuarioAutenticado } from "./services/authApi";
 import IncidentesPage from "./pages/IncidentesPage";
 import RegistroUsuarios from "./pages/RegistroUsuarios";
 import UsuariosFueraServicio from "./pages/UsuariosFueraServicio";
@@ -12,6 +14,30 @@ import { RutaPrivada, RutaPublica, RutaPorRol, FueraDelPanel } from "./component
 
 // Componente Principal con las Rutas
 export default function App() {
+  const [sesionVerificada, setSesionVerificada] = useState(false);
+
+  // La sesión local solo sirve para la UI: se valida con el backend antes de pintar el panel
+  useEffect(() => {
+    let activo = true;
+    obtenerUsuarioAutenticado()
+      .then(() => {
+        if (activo) setSesionVerificada(true);
+      })
+      .catch(() => {
+        limpiarSesionLocal();
+        if (window.location.pathname !== "/login") {
+          window.location.replace("/login");
+        } else if (activo) {
+          setSesionVerificada(true);
+        }
+      });
+    return () => {
+      activo = false;
+    };
+  }, []);
+
+  if (!sesionVerificada) return null;
+
   return (
     <Router>
       <Routes>

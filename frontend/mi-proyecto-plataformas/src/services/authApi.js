@@ -18,6 +18,14 @@ export async function iniciarSesion(email, password) {
   return cuerpo;
 }
 
+export async function obtenerUsuarioAutenticado() {
+  const respuesta = await fetch(`${API_URL}/me`, { credentials: "include" });
+  if (!respuesta.ok) {
+    throw new Error("Sesión no válida");
+  }
+  return (await respuesta.json()).usuario;
+}
+
 export async function cerrarSesionEnServidor() {
   try {
     await fetch(`${API_URL}/logout`, { method: "POST", credentials: "include" });

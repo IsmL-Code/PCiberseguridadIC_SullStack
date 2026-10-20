@@ -55,8 +55,16 @@ export function guardarSesion({ usuario, csrfToken, expiraEn }, storage = localS
   storage.setItem("sessionExpiresAt", String(expiraEn));
 }
 
+export function limpiarSesionLocal(storage = localStorage) {
+  ["isAuthenticated", "usuario", "csrfToken", "sessionExpiresAt"].forEach((clave) => storage.removeItem(clave));
+}
+
 export function limpiarSesion(storage = localStorage) {
   CLAVES_SESION.forEach((clave) => storage.removeItem(clave));
+}
+
+export function redirigirALogin() {
+  if (window.location.pathname !== "/login") window.location.replace("/login");
 }
 
 export function tieneAccesoARuta(rol, ruta) {

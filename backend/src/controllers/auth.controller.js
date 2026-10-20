@@ -1,4 +1,4 @@
-const bcrypt = require("bcryptjs");
+﻿const bcrypt = require("bcryptjs");
 const crypto = require("node:crypto");
 const jwt = require("jsonwebtoken");
 const prisma = require("../database/prisma");
@@ -9,7 +9,7 @@ const {
   opcionesCookieSesion,
   leerCookie
 } = require("../config/sesion");
-const { revocarToken } = require("../utils/tokensRevocados");
+const { revocarToken, tokenRevocado } = require("../utils/tokensRevocados");
 
 const { registrarAuditoria } = require("../utils/auditoria");
 
@@ -83,4 +83,37 @@ function cerrarSesion(req, res) {
   res.status(204).end();
 }
 
-module.exports = { iniciarSesion, cerrarSesion };
+async function obtenerSesionActual(req, res, next) {
+  const token = leerCookie(req, NOMBRE_COOKIE_SESION);
+  if (!token) {
+    return res.status(401).json({ error: "Token de autenticación requerido" });
+  }
+
+  let payload;
+  try {
+    payload = jwt.verify(token, obtenerSecretoJwt());
+  } catch {
+    return res.status(401).json({ error: "Token de autenticación inválido" });
+  }
+
+  if (tokenRevocado(payload.jti)) {
+    return res.status(401).json({ error: "Sesion cerrada" });
+  }
+
+  try {
+    const usuario = await prisma.usuario.findUnique({
+      where: { id: Number(payload.sub) },
+      select: { id: true, nombre: true, apellido: true, rol: true, status: true }
+    });
+    if (!usuario || usuario.status !== "ACTIVE") {
+      return res.status(401).json({ error: "Sesión no válida" });
+    }
+
+    const { id, nombre, apellido, rol } = usuario;
+    res.json({ usuario: { id, nombre, apellido, rol } });
+  } catch (error) {
+    next(error);
+  }
+}
+
+module.exports = { iniciarSesion, cerrarSesion, obtenerSesionActual };
