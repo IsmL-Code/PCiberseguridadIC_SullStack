@@ -700,8 +700,8 @@ code {
 .incidentes-search {
   position: relative;
   display: flex;
-  min-width: 210px;
-  flex: 0 1 280px;
+  min-width: 150px;
+  flex: 1 1 200px;
   height: 48px;
 }
 
@@ -740,8 +740,8 @@ code {
 }
 
 .incidentes-filter {
-  min-width: 160px;
-  flex: 0 1 220px;
+  min-width: 130px;
+  flex: 1 1 140px;
   height: 48px;
   box-sizing: border-box;
   padding: 10px 12px !important;
@@ -757,8 +757,9 @@ code {
   align-items: center;
   justify-content: center;
   gap: 7px;
-  margin-left: auto;
-  padding: 10px 16px;
+  margin-left: 0;
+  flex: 0 0 auto;
+  padding: 10px 14px;
   border: 0;
   border-radius: 5px;
   color: #fff;
