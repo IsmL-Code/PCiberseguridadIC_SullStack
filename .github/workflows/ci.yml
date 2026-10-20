@@ -16,7 +16,7 @@ concurrency:
 jobs:
   backend:
     name: Backend (lint, test, migrate)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     defaults:
       run:
         working-directory: backend
@@ -39,8 +39,8 @@ jobs:
       JWT_SECRET: ci-test-secret-con-al-menos-32-caracteres
       NODE_ENV: test
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: npm
@@ -51,17 +51,18 @@ jobs:
       - run: npm run lint
       - run: npm test
       - run: npm run test:jest
+
   frontend:
     name: Frontend (lint, test, build)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     defaults:
       run:
         working-directory: frontend/mi-proyecto-plataformas
     env:
       VITE_API_URL: ${{ vars.VITE_API_URL || 'https://api.ejemplo.com' }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: npm
@@ -75,7 +76,7 @@ jobs:
     name: Deploy a Render
     needs: [backend, frontend]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     env:
       BACKEND_HOOK: ${{ secrets.RENDER_BACKEND_DEPLOY_HOOK }}
       FRONTEND_HOOK: ${{ secrets.RENDER_FRONTEND_DEPLOY_HOOK }}
