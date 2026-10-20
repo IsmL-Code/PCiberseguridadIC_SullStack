@@ -277,6 +277,7 @@ function ListaIncidentes({
           style={{ ...inputStyle, cursor: 'pointer', marginTop: 0 }}
         >
           <option value="">Todas las prioridades</option>
+          <option value="CRITICA">Crítica</option>
           <option value="ALTA">Alta</option>
           <option value="MEDIA">Media</option>
           <option value="BAJA">Baja</option>
