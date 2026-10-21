@@ -4,7 +4,7 @@ Aplicación web para registrar y consultar incidentes de ciberseguridad. Incluye
 
 ## Cambio de base de datos
 
-Con fines prácticos y de portabilidad, la base de datos del proyecto se migró de MySQL a PostgreSQL. PostgreSQL cuenta con una oferta de servicio administrado en prácticamente todas las plataformas de despliegue (Render, Railway, Heroku, Fly.io, Supabase, Neon, AWS RDS, Google Cloud SQL, Azure, entre otras), con planes gratuitos o de bajo costo que facilitan las fases de prueba y académicas. Esto evita tener que montar y mantener un servidor de base de datos propio, y aporta respaldos automáticos, actualizaciones de seguridad, escalado y monitoreo gestionados por el proveedor.
+Con fines prácticos y de portabilidad, la base de datos del proyecto se migró de MySQL a PostgreSQL. Hay servicios administrados para PostgreSQL en distintas plataformas; las opciones de respaldo, actualizaciones, escalado y monitoreo dependen del proveedor y del plan contratado.
 
 ## Requisitos
 
@@ -146,6 +146,8 @@ Todas las rutas de negocio están bajo `/api`. `GET /health` es público y compr
 | `PATCH` | `/api/usuarios/:id/estado` | Solo administrador | Cambia el estado de un usuario. |
 | `DELETE` | `/api/usuarios/:id` | Solo administrador | Marca al usuario como eliminado. |
 
+Los listados de incidentes, incidentes eliminados y usuarios admiten paginación opcional mediante `?pagina=1&limite=15` (máximo 100). Si no se envían esos parámetros, mantienen la respuesta completa en forma de arreglo por compatibilidad con el cliente actual. La interfaz aplica su propia paginación al conjunto recibido.
+
 Las solicitudes HTTP se registran como JSON en la salida estándar, sin incluir query strings ni credenciales. Render recoge esa salida en los logs del servicio; la retención disponible depende del plan de Render.
 
 Los roles admitidos son `Administrador`, `Analista` y `Supervisor`. Los incidentes tienen tipo, prioridad (`BAJA`, `MEDIA`, `ALTA`, `CRITICA`) y estado (`ABIERTO`, `EN_PROCESO`, `CERRADO`). Administradores y supervisores pueden consultar el conjunto de incidentes; los analistas trabajan con los propios. La autorización efectiva de cada operación se aplica en la API.
@@ -227,3 +229,5 @@ Limitaciones conocidas: la lista de tokens revocados (cierre de sesión) y la ca
 Las pruebas de API se ejecutan con `npm test` desde `backend/`. La prueba de incidentes sustituye los métodos del servicio de persistencia por implementaciones en memoria, por lo que el ciclo CRUD probado no modifica datos de PostgreSQL. `npm run test:jest` valida reglas de negocio (visibilidad por rol, borrado lógico y paginación). En `frontend/mi-proyecto-plataformas/`, `npm test` ejecuta las pruebas unitarias de utilidades.
 
 Antes de publicar, ejecuta `npm run lint`, `npm test`, `npm run test:jest` y `npm run audit:prod` en el backend, y `npm run lint`, `npm test`, `npm run build` y `npm audit` en el frontend.
+
+`npm run audit:prod` solo revisa dependencias de producción del backend. En la verificación del 20 de octubre de 2026, la auditoría completa del backend reportó 19 vulnerabilidades moderadas en dependencias de desarrollo; la auditoría de producción del backend y la auditoría completa del frontend reportaron cero. Consulta [auditoria.md](./auditoria.md) para el alcance y los resultados detallados.

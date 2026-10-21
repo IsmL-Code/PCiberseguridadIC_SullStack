@@ -2,7 +2,7 @@
 
 ## Cambio de base de datos
 
-Con fines prácticos y de portabilidad, la base de datos del proyecto se migró de MySQL a PostgreSQL. PostgreSQL cuenta con una oferta de servicio administrado en prácticamente todas las plataformas de despliegue (Render, Railway, Heroku, Fly.io, Supabase, Neon, AWS RDS, Google Cloud SQL, Azure, entre otras), con planes gratuitos o de bajo costo que facilitan las fases de prueba y académicas. Esto evita tener que montar y mantener un servidor de base de datos propio, y aporta respaldos automáticos, actualizaciones de seguridad, escalado y monitoreo gestionados por el proveedor.
+Con fines prácticos y de portabilidad, la base de datos del proyecto se migró de MySQL a PostgreSQL. Hay servicios administrados para PostgreSQL en distintas plataformas; las opciones de respaldo, actualizaciones, escalado y monitoreo dependen del proveedor y del plan contratado.
 
 Para ejecutarlo en local: `docker compose up -d`, `npx prisma migrate deploy` y `npm run dev`. `DATABASE_URL` usa el formato `postgresql://usuario:clave@host:5432/base?schema=public`.
 
