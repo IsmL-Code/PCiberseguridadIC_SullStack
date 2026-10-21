@@ -8,15 +8,25 @@ Esta guía describe los componentes disponibles en el repositorio y los pasos pa
 
 ## 2. Arquitectura
 
-```text
-Navegador
-  └── Frontend React + React Router (Vite)
-        └── HTTPS / API REST JSON
-              └── Backend Express
-                    ├── Middlewares: CORS, Helmet, límites, autenticación,
-                    │   CSRF, permisos, validación y errores
-                    ├── Controladores y servicios
-                    └── Prisma Client → PostgreSQL
+```mermaid
+flowchart TD
+    navegador["Navegador"]
+    subgraph frontend["Frontend"]
+        react["React + React Router<br/>(Vite, SPA)"]
+        servicios["Servicios HTTP"]
+        react --> servicios
+    end
+    subgraph backend["API REST · Express"]
+        middleware["Middlewares<br/>CORS · Helmet · límites<br/>Autenticación · CSRF · permisos<br/>Validación · errores"]
+        app["Rutas y controladores"]
+        logica["Servicios y reglas de negocio"]
+        middleware --> app --> logica
+    end
+    prisma["Prisma Client"]
+    postgres[("PostgreSQL")]
+    navegador --> react
+    servicios -->|"HTTPS · JSON /api"| middleware
+    logica --> prisma --> postgres
 ```
 
 - **Frontend:** aplicación de página única (SPA). Los servicios HTTP se encuentran en `frontend/mi-proyecto-plataformas/src/services/`.
