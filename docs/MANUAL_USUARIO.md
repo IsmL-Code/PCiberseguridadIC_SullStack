@@ -3,8 +3,8 @@
 **Plataforma de gestión de incidentes de ciberseguridad (PCiberseguridadIC)**
 
 Estudiante: Jefferson Ismael Condo Cepeda · Asignatura: Desarrollo en Plataformas V · PUCE Virtual
-Versión: 1.0 · Fecha: [COMPLETAR]
-URL de la plataforma: [COMPLETAR: URL pública del frontend]
+Versión: 1.0 · Fecha: 21/10/2026
+URL de la plataforma: debe ser proporcionada por el administrador del despliegue (usar siempre HTTPS).
 
 ## 1. Para qué sirve
 
@@ -47,7 +47,7 @@ Pulse **Salir**, arriba a la derecha. Hágalo siempre en equipos compartidos.
 
 ## 4. Panel de monitoreo
 
-Muestra cuatro tarjetas: **incidentes totales**, **severidad crítica**, **en proceso** y **resueltos**. Debajo está el **Registro de incidentes**, con título, tipo, sistema afectado, prioridad, estado y descripción. El botón de sol/luna cambia entre tema claro y oscuro.
+Muestra cuatro tarjetas: **Incidentes totales**, **Severidad crítica**, **En proceso** y **Resultados** (cantidad de incidentes cerrados). Debajo está el **Registro de incidentes**, con título, tipo, sistema afectado, prioridad, estado y descripción. El botón de sol/luna cambia entre tema claro y oscuro.
 
 ## 5. Gestión de incidentes
 
@@ -65,7 +65,7 @@ Muestra cuatro tarjetas: **incidentes totales**, **severidad crítica**, **en pr
 
 ### 5.2 Buscar y filtrar
 
-Use el cuadro de búsqueda (título o tipo) y los desplegables **Todas las prioridades** y **Todos los estados**.
+Use el cuadro de búsqueda para buscar por ID, título, tipo o descripción, y los desplegables **Todas las prioridades** y **Todos los estados**.
 
 ### 5.3 Editar
 
@@ -77,19 +77,19 @@ Para cerrar un caso, cambie su **Estado** a *Cerrado*.
 ### 5.4 Eliminar
 
 1. Pulse el botón rojo de **eliminar** (papelera).
-2. Revise la confirmación (ID, título y prioridad) y pulse **Aceptar**, o cancele.
+2. Revise el título y la prioridad que aparecen en la confirmación y pulse **Aceptar**, o cancele.
 
 La eliminación es **lógica**: el incidente sale de la lista normal pero se conserva para auditoría. Solo el administrador lo ve en **Incidentes eliminados** (menú lateral).
 
 ### 5.5 Mensajes de validación
 
-Si un campo no cumple las reglas, el formulario no se guarda y aparece un aviso junto al campo. Por ejemplo, un título como «asdfgh» se rechaza con «Debe ser una palabra o frase legible, no una secuencia aleatoria de letras o números». Corrija el campo y guarde de nuevo.
+Si un campo no cumple las reglas, el formulario no se guarda y aparece un aviso general en la parte superior de la pantalla. Por ejemplo, un título como «asdfgh» se rechaza con «Debe ser una palabra o frase legible, no una secuencia aleatoria de letras o números». Corrija el campo indicado en el aviso y guarde de nuevo.
 
 ## 6. Gestión de usuarios (solo Administrador)
 
 Desde el menú lateral: **Registrar nuevo usuario** y **Usuarios fuera de servicio**.
 
-1. **Crear:** pulse **Registrar nuevo usuario**; complete nombre, apellido, correo, contraseña (mínimo 8 caracteres, repetida) y rol (Administrador, Analista o Supervisor); pulse **Guardar**. La cuenta queda *Pendiente*.
+1. **Crear:** pulse **Registrar nuevo usuario**; complete nombre, apellido, correo, contraseña y rol (Administrador, Analista o Supervisor); pulse **Guardar**. La contraseña debe tener entre 8 y 72 caracteres, sin espacios, e incluir mayúscula, minúscula, número y símbolo. No puede contener secuencias comunes ni el nombre, apellido o parte inicial del correo. Repita la contraseña en el campo de confirmación. La cuenta queda *Pendiente*.
 2. **Activar, modificar o suspender:** pulse **editar** en la lista; cambie los datos o el **Estado** (*Pendiente*, *Activo*, *Suspendido*). La contraseña es opcional: déjela vacía para conservar la actual.
 3. **Marcar fuera de servicio:** pulse el botón rojo y confirme. El usuario deja de poder ingresar, pero su registro se conserva para auditorías.
 
@@ -105,7 +105,7 @@ Solo los usuarios **Activos** pueden iniciar sesión.
 | No aparece el botón de crear, editar o eliminar | Su rol no tiene ese permiso | Consulte la tabla de la sección 2 |
 | La página tarda en abrir la primera vez | El servicio en la nube se reactiva tras un tiempo sin uso | Espere unos segundos y recargue |
 | Volví a la pantalla de inicio de sesión | La sesión venció | Inicie sesión de nuevo |
-| Un formulario no se guarda | Algún campo no cumple las reglas | Revise el aviso junto al campo marcado |
+| Un formulario no se guarda | Algún campo no cumple las reglas | Lea el aviso general que aparece en la parte superior y corrija el campo indicado |
 
 ## 8. Uso seguro
 
@@ -116,10 +116,4 @@ Solo los usuarios **Activos** pueden iniciar sesión.
 
 ## 9. Cuentas de demostración
 
-Cuentas temporales para la evaluación (contraseñas entregadas por separado; se cambian o eliminan después de la defensa):
-
-| Rol | Correo | Contraseña |
-| --- | --- | --- |
-| Administrador | [COMPLETAR] | [Entregada por separado] |
-| Supervisor | [COMPLETAR] | [Entregada por separado] |
-| Analista | [COMPLETAR] | [Entregada por separado] |
+Las cuentas de demostración dependen del entorno desplegado y no se incluyen en este documento.

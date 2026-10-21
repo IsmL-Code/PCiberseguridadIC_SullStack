@@ -186,7 +186,7 @@ Ejecuta cada comando desde la carpeta del componente correspondiente.
 | `npm run audit:prod` | Audita dependencias de producción. |
 | `npm run migrate:passwords` | Inspecciona hashes heredados; modificar datos requiere confirmación explícita. |
 
-Para migrar hashes heredados, primero ejecuta `npm run migrate:passwords` sin confirmación para obtener el conteo. Antes de transformar datos, revisa el entorno y respalda la base. La operación exige `CONFIRM_LEGACY_PASSWORD_HASH_MIGRATION=true` solo para esa ejecución; consulta [backend/README.md](./backend/README.md) para el procedimiento PowerShell detallado. El script convierte a bcrypt con costo 12 los valores que no sean ya bcrypt.
+Para migrar hashes heredados, primero ejecuta `npm run migrate:passwords` sin confirmación para obtener el conteo. Antes de transformar datos, revisa el entorno y respalda la base. La operación exige `CONFIRM_LEGACY_PASSWORD_HASH_MIGRATION=true` solo para esa ejecución; consulta [backend/README.md](../backend/README.md) para el procedimiento PowerShell detallado. El script convierte a bcrypt con costo 12 los valores que no sean ya bcrypt.
 
 ### Frontend (`frontend/mi-proyecto-plataformas/`)
 
@@ -347,7 +347,7 @@ Para mantener el sistema, revisa las dependencias con `npm audit` (frontend) y `
 
 ## Referencias del repositorio
 
-- [README principal](./README.md): guía breve de instalación, variables, API y pruebas.
-- [README del backend](./backend/README.md): procedimiento operativo para PostgreSQL y hashes heredados.
-- [Esquema Prisma](./backend/prisma/schema.prisma): modelo persistente.
-- [Configuración Render](./render.yaml): servicios y comandos de despliegue.
+- [README principal](../README.md): guía breve de instalación, variables, API y pruebas.
+- [README del backend](../backend/README.md): procedimiento operativo para PostgreSQL y hashes heredados.
+- [Esquema Prisma](../backend/prisma/schema.prisma): modelo persistente.
+- [Configuración Render](../render.yaml): servicios y comandos de despliegue.
