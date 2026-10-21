@@ -2,7 +2,7 @@
 
 **Plataforma de gestión de incidentes de ciberseguridad (PCiberseguridadIC)**
 
-Estudiante: Jefferson Ismael Condo Cepeda · Asignatura: Desarrollo en Plataformas V · PUCE Virtual
+
 Versión: 1.0 · Fecha: 21/10/2026
 URL de la plataforma: debe ser proporcionada por el administrador del despliegue (usar siempre HTTPS).
 
